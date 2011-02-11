@@ -1,16 +1,43 @@
-import java.io.BufferedReader;
+mport java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
+import BranchServer;
 
 public class topology {
-	private String filePath;
+	private static String filePath;
+	private static int startingPort = "3000";
+	private static HashMap alreadyCreatedServerList = new HashMap();
 	
-	public topology(String inputFilePath) throws IOException {
-		super();
-		this.filePath = inputFilePath;
+	private static void makeBranchServer(String communicateFrom, String communicateTo, int serverPort) {
+		if (null == communicateFrom) { // This means we just need to create a new server with no connections.
+			BranchServer theNewServer = new BranchServer(communicateTo,serverPort++);
+			theNewServer.start();
+			alreadyCreatedServerList.put(communicateTo, theNewServer);
+		} else {
+			BranchServer theNewServer = new BranchServer(communicateFrom, communicateTo, serverPort++);
+			theNewServer.start();
+			alreadyCreatedServerList.put(communicateFrom, theNewServer);
+		}
+	}
+	
+	private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
+		BranchServer branchServerFrom = alreadyCreatedServerList.get(fromServer);
+		BranchServer branchServerTo = alreadyCreatedServerList.get(toServer);
+		branchServerFrom.addComm(branchServerTo);
+	}
+	
+	/**
+	 * Creates the various BranchServers based upon the relationships specified in inputFilePath. 
+	 *                      
+	@param  inputFilePath  an absolute file path that exists on the local machine
+	 *  
+	**/
+	public static void makeTopology(String inputFilePath) throws IOException {
+		filePath = inputFilePath;
 
 	    FileInputStream theFis = new FileInputStream(filePath);
 	    DataInputStream theDis = new DataInputStream(theFis);
@@ -21,6 +48,19 @@ public class topology {
 	    	String[] theNode = currentLine.split(" ");
 	    	String canSend = theNode[0];
 	    	String canReceiveFromSender = theNode[1];
+	    	
+	    	// If needed, create second server first, so that the reference exists when makeBranchServer() needs it.
+	    	if (null == alreadyCreatedServerList.get(theNode[1])) {
+	    		makeBranchServer(null,theNode[1],startingPort++);
+	    	}
+	    	if (null == alreadyCreatedServerList.get(theNode[0])) {
+	    		// Server hasn't been created.  Start 'er up!
+	    		makeBranchServer(theNode[0],theNode[1],startingPort++);
+	    		
+	    	} else {
+	    		// Allow server corresponding to first parameter to communicate with server corresponding to second parameter
+	    		allowOneDirectionalCommunication(theNode[0],theNode[1]);
+	    	}
 	    }
 	    
 	    theFis.close();
@@ -28,5 +68,7 @@ public class topology {
 	    theReader.close();
 	}
 
+	public static void main(String args[]) {
+		makeTopology(args[0]);
+	}
 }
-
