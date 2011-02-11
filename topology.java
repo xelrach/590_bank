@@ -1,11 +1,9 @@
-mport java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-
-import BranchServer;
 
 public class topology {
 	private static String filePath;
@@ -13,20 +11,20 @@ public class topology {
 	private static HashMap alreadyCreatedServerList = new HashMap();
 	
 	/**
-	 * Invokes method on the BranchServer class to create one branch server.      
+	 * Invokes method on the Branch_Server class to create one branch server.      
 	 @param serverName A string containing the unique name of the server.
 	 @param serverPort The server port on which to are going to bind this server instance.
 	 */
 	private static void makeBranchServer(String serverName, int serverPort) {
-			BranchServer theNewServer = new BranchServer(serverName, serverPort);
+			Branch_Server theNewServer = new Branch_Server(serverName, serverPort);
 			theNewServer.start();
-			// Store [String name,BranchServer theNewServer] in the alreadyCreatedServerList
+			// Store [String name,Branch_Server theNewServer] in the alreadyCreatedServerList
 			alreadyCreatedServerList.put(serverName, theNewServer);
 	}
 	
 	private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
-		BranchServer branchServerFrom = alreadyCreatedServerList.get(fromServer);
-		BranchServer branchServerTo = alreadyCreatedServerList.get(toServer);
+		Branch_Server branchServerFrom = alreadyCreatedServerList.get(fromServer);
+		Branch_Server branchServerTo = alreadyCreatedServerList.get(toServer);
 		branchServerFrom.addComm(branchServerTo);
 	}
 	
