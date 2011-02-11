@@ -4,10 +4,30 @@ import java.util.*;
 
 public class Branch_Server {
 
+	public String name = "some branch";
 	public int port = 4444;
-	public ServerThread serverThread;
+	public ServerThread serverThread = new ServerThread(this);
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
+
+	public Branch_Server(String name, int port) {
+		this.name = name;
+		this.port = port;
+
+		serverThread.port = port;
+		serverThread.name = name;
+	}
+
+	public void addComm(Branch_Server branch) {
+		return;
+	}
+
+	public void start() {
+		if (serverThread != null) {
+			Thread thread = new Thread(serverThread);
+			thread.start();
+		}
+	}
 
 	public String process_input(String input) {
 		String answer = "";
@@ -175,30 +195,43 @@ public class Branch_Server {
 class ServerThread implements Runnable {
     protected DatagramSocket socket = null;
     protected BufferedReader in = null;
-    protected boolean moreQuotes = true;
+    protected boolean serverRunning = true;
 
+    public String name;
     public int port;
+    public Branch_Server thisBranch;
 
-
-    public ServerThread(int port) throws IOException {
-	this("ServerThread", port);
+    public ServerThread(Branch_Server branch) {
+	this(branch, "ServerThread", 4444);
     }
 
-    public ServerThread(String name, int port) throws IOException {
+    public ServerThread(Branch_Server branch, int port) {
+	this(branch, "ServerThread", port);
+    }
+
+    public ServerThread(Branch_Server branch, String name, int port) { 
+	this.thisBranch = branch;
+	this.name = name;
 	this.port = port;
-        socket = new DatagramSocket(port);
+    }
+
+
+    public void run() {
+	this.port = port;
+
+	try {
+		socket = new DatagramSocket(port);
+	} catch(Exception e) {
+
+	}
 
         try {
             in = new BufferedReader(new FileReader("one-liners.txt"));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open quote file. Serving time instead.");
         }
-    }
 
-
-    public void run() {
-
-        while (moreQuotes) {
+        while (serverRunning) {
             try {
                 byte[] buf = new byte[256];
                 byte[] inbuf = new byte[256];
@@ -210,7 +243,7 @@ class ServerThread implements Runnable {
 		
 		// figure out response
 		String input = new String(buf);
-                String dString = process_input( input );
+                String dString = thisBranch.process_input( input );
 
 		
 		
@@ -224,7 +257,7 @@ class ServerThread implements Runnable {
                 socket.send(packet);
             } catch (IOException e) {
                 e.printStackTrace();
-		moreQuotes = false;
+		serverRunning = false;
             }
         }
 	System.out.println("Closing socket.");
