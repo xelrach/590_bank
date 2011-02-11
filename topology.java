@@ -13,21 +13,15 @@ public class topology {
 	private static HashMap alreadyCreatedServerList = new HashMap();
 	
 	/**
-	 * Invokes methods on the BranchServer class to create either one or two branch servers.       
-	 @param communicateFrom  The first server specified on some line "i" of the input file
-	 @param communicateTo The second server specific on line "i"
+	 * Invokes method on the BranchServer class to create one branch server.      
+	 @param serverName A string containing the unique name of the server.
 	 @param serverPort The server port on which to are going to bind this server instance.
 	 */
-	private static void makeBranchServer(String communicateFrom, String communicateTo, int serverPort) {
-		if (null == communicateFrom) { // This means we just need to create a new server with no connections.
-			BranchServer theNewServer = new BranchServer(communicateTo, serverPort);
+	private static void makeBranchServer(String serverName, int serverPort) {
+			BranchServer theNewServer = new BranchServer(serverName, serverPort);
 			theNewServer.start();
-			alreadyCreatedServerList.put(communicateTo, theNewServer);
-		} else {
-			BranchServer theNewServer = new BranchServer(communicateFrom, communicateTo, serverPort);
-			theNewServer.start();
-			alreadyCreatedServerList.put(communicateFrom, theNewServer);
-		}
+			// Store [String name,BranchServer theNewServer] in the alreadyCreatedServerList
+			alreadyCreatedServerList.put(serverName, theNewServer);
 	}
 	
 	private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
@@ -50,21 +44,18 @@ public class topology {
 	    
 	    String currentLine;
 	    while ((currentLine = theReader.readLine()) != null) {
-	    	String[] theNode = currentLine.split(" ");
-	    	String canSend = theNode[0];
-	    	String canReceiveFromSender = theNode[1];
+	    	String[] serversOnCurrentLine = currentLine.split(" ");
 	    	
-	    	// If needed, create second server first, so that the reference exists when makeBranchServer() needs it.
-	    	if (null == alreadyCreatedServerList.get(theNode[1])) {
-	    		makeBranchServer(null,theNode[1],startingPort++);
-	    	}
-	    	if (null == alreadyCreatedServerList.get(theNode[0])) {
-	    		// Server hasn't been created.  Start 'er up!
-	    		makeBranchServer(theNode[0],theNode[1],startingPort++);
-	    		
-	    	} else {
-	    		// Allow server corresponding to first parameter to communicate with server corresponding to second parameter
-	    		allowOneDirectionalCommunication(theNode[0],theNode[1]);
+	    	// Loop through 
+	    	for (int i = 1; i <= serversOnCurrentLine.length; i++) {
+	    		String currentServer = serversOnCurrentLine[i];
+	    		if (null == alreadyCreatedServerList.get(currentServer)) {
+	    			makeBranchServer(currentServer,startingPort++);
+	    		}
+	    		if ((i % 2) == 0) {
+	    			// Allow communication from first server on current line to second server on current line
+	    			allowOneDirectionalCommunication(serversOnCurrentLine[i-1],serversOnCurrentLine[i]);
+	    		}
 	    	}
 	    }
 	    
