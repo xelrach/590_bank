@@ -9,16 +9,22 @@ import BranchServer;
 
 public class topology {
 	private static String filePath;
-	private static int startingPort = "3000";
+	private static int startingPort = 3000;
 	private static HashMap alreadyCreatedServerList = new HashMap();
 	
+	/**
+	 * Invokes methods on the BranchServer class to create either one or two branch servers.       
+	 @param communicateFrom  The first server specified on some line "i" of the input file
+	 @param communicateTo The second server specific on line "i"
+	 @param serverPort The server port on which to are going to bind this server instance.
+	 */
 	private static void makeBranchServer(String communicateFrom, String communicateTo, int serverPort) {
 		if (null == communicateFrom) { // This means we just need to create a new server with no connections.
-			BranchServer theNewServer = new BranchServer(communicateTo,serverPort++);
+			BranchServer theNewServer = new BranchServer(communicateTo, serverPort);
 			theNewServer.start();
 			alreadyCreatedServerList.put(communicateTo, theNewServer);
 		} else {
-			BranchServer theNewServer = new BranchServer(communicateFrom, communicateTo, serverPort++);
+			BranchServer theNewServer = new BranchServer(communicateFrom, communicateTo, serverPort);
 			theNewServer.start();
 			alreadyCreatedServerList.put(communicateFrom, theNewServer);
 		}
@@ -31,11 +37,10 @@ public class topology {
 	}
 	
 	/**
-	 * Creates the various BranchServers based upon the relationships specified in inputFilePath. 
-	 *                      
-	@param  inputFilePath  an absolute file path that exists on the local machine
-	 *  
-	**/
+	 * Creates the various BranchServers based upon the relationships specified in inputFilePath.              
+	 @param  inputFilePath The absolute path to the file which specifies branch topology.
+	 @throws IOException
+	 */
 	public static void makeTopology(String inputFilePath) throws IOException {
 		filePath = inputFilePath;
 
@@ -68,6 +73,10 @@ public class topology {
 	    theReader.close();
 	}
 
+	/**
+	 * Calls the makeTopology() method.    
+	 @param args[0] The absolute path to the file which specifies branch topology.
+	 */
 	public static void main(String args[]) {
 		makeTopology(args[0]);
 	}
