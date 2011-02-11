@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class topology {
 	private static String filePath;
 	private static int startingPort = 3000;
-	private static HashMap alreadyCreatedServerList = new HashMap();
+	private static HashMap<String,Branch_Server> alreadyCreatedServerList = new HashMap<String,Branch_Server>();
 	
 	/**
 	 * Invokes method on the Branch_Server class to create one branch server.      
@@ -67,6 +67,8 @@ public class topology {
 	 @param args[0] The absolute path to the file which specifies branch topology.
 	 */
 	public static void main(String args[]) {
-		makeTopology(args[0]);
+		try {
+			makeTopology(args[0]);
+		} catch (Exception e) {}
 	}
 }
