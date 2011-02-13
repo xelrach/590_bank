@@ -9,6 +9,7 @@ public class Branch_Server {
 	public ServerThread serverThread = new ServerThread(this);
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
+	public HashMap<String, Branch_Server> branches = new HashMap<String, Branch_Server>();
 
 	public Branch_Server(String name, int port) {
 		this.name = name;
@@ -19,6 +20,12 @@ public class Branch_Server {
 	}
 
 	public void addComm(Branch_Server branch) {
+		
+		if (branches.containsKey(branch.name) || this.name == branch.name)
+			return;
+
+		branches.put(branch.name, branch);
+
 		return;
 	}
 
@@ -104,6 +111,14 @@ public class Branch_Server {
 		return answer;
 	}
 
+	public String getBranchFromAccountID(String accountID) {
+		String branchID = "";
+
+		if (accountID.length() > 2)
+			branchID = accountID.substring(0, 1);
+
+		return branchID;
+	}
 
 	public String deposit(String accountID, float amount) {
 		String answer = "error";
@@ -129,31 +144,38 @@ public class Branch_Server {
 	}
 
 	public boolean validAccount(String accountID) {
-		System.out.println("Checking validity of [" + accountID + "]");
+		return validAccount(accountID, false);
+	}
+
+	public boolean validAccount(String accountID, boolean mustBeLocal) {
+		String branchID = getBranchFromAccountID(accountID);
+		if (!mustBeLocal && branchID != this.name) {
+			if (branches.containsKey(branchID))
+				return true; // remote branch that this one can talk to
+		}
 
 		Account account = accounts.get(accountID);
-
-		if (account == null)
-			System.out.println("tried to get account [" + accountID + "] but it's null.");
 
 		return account != null;
     	}
 
-	public String transfer(String accountFromID, String accountToID, float amount) {
+	public String transfer(String srcAccountID, String dstAccountID, float amount) {
 		String answer = "error";
 
-		if (!validAccount(accountFromID)) {
+		// make sure source account exists locally
+		if (!validAccount(srcAccountID, true)) {
 			answer = "error-from";
 			return answer;
 		}
 
-		if (!validAccount(accountToID)) {
+		// make sure destination account exists or belongs to a branch that can be contacted
+		if (!validAccount(dstAccountID)) {
 			answer = "error-to";
 			return answer;
 		}
 
-		Account accountFrom = accounts.get(accountFromID);
-		Account accountTo = accounts.get(accountToID);
+		Account accountFrom = accounts.get(srcAccountID);
+		Account accountTo = accounts.get(dstAccountID);
 
 		if (amount < 0) {
 			answer = "error-invalid";
