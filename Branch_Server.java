@@ -12,7 +12,7 @@ public class Branch_Server {
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
-	private NetworkWrapper messages = new NetworkWrapper(branches);
+	private NetworkWrapper messages;
 
 	public Branch_Server(String name, int port) {
 		this.name = name;
@@ -22,18 +22,23 @@ public class Branch_Server {
 		branch.ServPort = port;
 		branch.GUIPort = 12345;
 
+		System.out.println("Branch name: " + name);
 		serverThread.port = port;
 		serverThread.name = name;
 		
+
+		System.out.println("branches is " + branches.toString());
+		messages = new NetworkWrapper(branches);
 	}
 
 	public void addComm(Branch branch) {
-		
-		if (branches.containsKey(branch.name) || this.name == branch.name)
+		if (branch == null || branches.containsKey(branch.name) || this.name == branch.name) {
+			System.out.println("Not adding link");
 			return;
+		}
 
+		System.out.println("Adding link from " + this.name + " to " + branch.name);
 		branches.put(branch.name, branch);
-
 		return;
 	}
 
@@ -42,6 +47,7 @@ public class Branch_Server {
 			Thread thread = new Thread(serverThread);
 			thread.start();
 		}
+		System.out.println("Done starting branch " + branch.name);
 	}
 
 	public String process_input(String input) {
@@ -101,6 +107,9 @@ public class Branch_Server {
 	public String withdrawal(String accountID, float amount) {
 		String answer = "error";
 
+		if (!getBranchFromAccountID(accountID).equals(this.name))
+			return "wrongbranch";
+
 		checkOrCreateAccount(accountID);
 
 		if (amount < 0) {
@@ -109,6 +118,10 @@ public class Branch_Server {
 		}
 
 		Account account = accounts.get(accountID);
+
+		if (account == null)
+			return answer;
+
 		account.addBalance(-amount);
 	
 		answer = "ok";
@@ -120,7 +133,7 @@ public class Branch_Server {
 		String branchID = "";
 
 		if (accountID.length() > 2)
-			branchID = accountID.substring(0, 1);
+			branchID = accountID.substring(0, 2);
 
 		return branchID;
 	}
@@ -130,7 +143,11 @@ public class Branch_Server {
 
 		System.out.println("deposit");
 
+		if (!getBranchFromAccountID(accountID).equals(this.name))
+			return "wrongbranch " + getBranchFromAccountID(accountID) + ", " + this.name;
+
 		checkOrCreateAccount(accountID);
+		
 
 		if (amount < 0) {
 			answer = "error-invalid";
@@ -138,6 +155,10 @@ public class Branch_Server {
 		}
 
 		Account account = accounts.get(accountID);
+
+		if (account == null)
+			return answer;
+
 		account.addBalance(amount);
 	
 		answer = "ok";
@@ -151,9 +172,13 @@ public class Branch_Server {
 
 	public boolean validAccount(String accountID, boolean mustBeLocal) {
 		String branchID = getBranchFromAccountID(accountID);
-		if (!mustBeLocal && branchID != this.name) {
-			if (branches.containsKey(branchID))
+		if (!mustBeLocal && !branchID.equals(this.name)) {
+			System.out.println("account " + accountID + " is in different branch (" + branchID + ", this is " + this.name + " ... do we have access?");
+			if (branches.containsKey(branchID)) {
+				System.out.println("yes");
 				return true; // remote branch that this one can talk to
+			}
+				System.out.println("no, neighbors are " + messages.whoNeighbors());
 		}
 
 		Account account = accounts.get(accountID);
@@ -163,6 +188,9 @@ public class Branch_Server {
 
 	public String transfer(String messageID, String srcAccountID, String dstAccountID, float amount) {
 		String answer = "error";
+
+		if (!getBranchFromAccountID(srcAccountID).equals(this.name))
+			return "wrongbranch " + getBranchFromAccountID(srcAccountID) + ", " + this.name;
 
 		// make sure source account exists locally
 		checkOrCreateAccount(srcAccountID);
@@ -189,9 +217,11 @@ public class Branch_Server {
 		*/
 
 		accountFrom.addBalance(-amount);
-		if (validAccount(dstAccountID, true))
+		if (validAccount(dstAccountID, true)) {
+			System.out.println("Local transfer of " + amount + " from " + srcAccountID + " to " + dstAccountID);
 			accountTo.addBalance(amount);
-		else {
+		} else {
+			System.out.println("Transfering " + amount + " to " + dstAccountID);
 			sendTransfer(dstAccountID, messageID, amount);
 		}
 
@@ -203,7 +233,7 @@ public class Branch_Server {
 	public void sendTransfer(String accountID, String messageID, float amount) {
 		String branchID = getBranchFromAccountID(accountID);
 		String message = "";
-		message = messageID + " d " + accountID + " " + amount;
+		message = "c" + messageID + " d " + accountID + " " + amount;
 		messages.send( branchID, message );
 	}
 
@@ -213,9 +243,17 @@ public class Branch_Server {
 
 		Account account = null;
 
+		if (!getBranchFromAccountID(accountID).equals(this.name))
+			return "wrongbranch";
+
 		checkOrCreateAccount(accountID);
 
-		answer = "q" + " " + accountID + " " + account.getBalance();
+		account = accounts.get(accountID);
+
+		if (account == null)
+			return answer;
+
+		answer = "q" + " " + accountID + " " + Float.toString(account.getBalance());
 
 		return answer;
  	}
@@ -278,6 +316,7 @@ class ServerThread implements Runnable {
                 String dString = thisBranch.process_input( input );
 
 		
+		System.out.println("Sending: " + dString);
 		
 
                 buf = dString.getBytes();
@@ -291,6 +330,11 @@ class ServerThread implements Runnable {
                 e.printStackTrace();
 		serverRunning = false;
             }
+
+		try {
+			Thread.sleep(100);
+		} catch (Exception e) {
+		}
         }
 	System.out.println("Closing socket.");
         socket.close();
@@ -322,6 +366,9 @@ public boolean send(String branchID, String message) {
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("localhost");
 		byte[] sendData = message.getBytes();
+
+		System.out.println("Sending (to branch): " + message);
+
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, branch.ServPort);
 		clientSocket.send(sendPacket);
 		clientSocket.close();
@@ -334,7 +381,18 @@ public boolean send(String branchID, String message) {
 }
 
 	public String whoNeighbors() {
-		String result = "";
+		System.out.println("topology is " + topology.toString());
+
+		String result = "neighbors: ";
+		
+		Object[] keys = topology.keySet().toArray();
+		String key;
+		for (int i = 0; i < keys.length; i++) {
+			key = (String)keys[i];
+
+			result = result + key + " ";	
+		}
+
 		return result;
 	}
 
