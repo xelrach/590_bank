@@ -2,10 +2,10 @@
 How to use this system:
 
 1) Execute "./make"
-2) Insert desired input into sample.txt file like so:
-B1 B2
-B5 B1
+2) Insert desired branch-link input into sample.txt file like so:
+01 02
+05 01
 
-.. meaning that B1 can communicate with B2, and B5 can communicate with B1
-3) Execute "java topology"
+.. meaning that branch 01 can communicate with branch 02, and branch 05 can communicate with branch 01
+3) Execute "java topology TOPO"
 
