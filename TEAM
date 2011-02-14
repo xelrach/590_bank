@@ -6,4 +6,4 @@ Hui (hguo):  I wrote the ATM GUI with Swing on NetBeans IDE 6.9.1 platform. The 
 takes orders for users and sends the messages to its responsible server.  Only datagram client was implemented in GUI, so GUI always sends out
 messages.
 
-Pete (pstein): 
+Pete (pstein): I added the branch server class, with the logic for handling requests from the GUI and transfers from other branches.
