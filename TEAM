@@ -1,3 +1,5 @@
+Milestone #1:
+
 Charles (noneman):  I designed the message protocol. Built the original process starting script (since removed). Handled merging everyone's code. Wrote the make file.
 
 Zach (zdexter):  Created topology class that starts the system up and reads in the topology and constructs the various nodes.  Wrote TOPO, TEAM and README files.
@@ -7,3 +9,13 @@ takes orders for users and sends the messages to its responsible server.  Only d
 messages.
 
 Pete (pstein): I added the branch server class, with the logic for handling requests from the GUI and transfers from other branches.
+
+
+Milestone #2:
+Charles (noneman):
+
+Zach (zdexter):
+
+Hui (hguo):
+
+Pete (pstein):

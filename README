@@ -1,7 +1,7 @@
 
 How to use this system:
 
-1) Execute "./make"
+1) Execute "make"
 2) Insert desired branch-link input into TOPO file like so:
 01 02
 05 01

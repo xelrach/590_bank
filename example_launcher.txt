@@ -1,7 +1,0 @@
-B1
-Client: localhost 2000
-Server: 127.0.0.1 2001
-
-B2
-Client: localhost 2005
-Server: localhost 2010
