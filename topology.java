@@ -26,6 +26,7 @@ public class topology {
         private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
                 Branch_Server branchServerFrom = alreadyCreatedServerList.get(fromServer);
                 Branch_Server branchServerTo = alreadyCreatedServerList.get(toServer);
+
                 branchServerFrom.addComm(branchServerTo.branch);
                 System.out.println("Allowed communication from " + fromServer + " to " + toServer);
         }
@@ -46,18 +47,17 @@ public class topology {
                 String[] serversOnCurrentLine = currentLine.split(" ");
                 
                 // Loop through 
-                for (int i = 1; i < serversOnCurrentLine.length; i++) {
-                        String currentServer = serversOnCurrentLine[i];
-                        if (null == alreadyCreatedServerList.get(currentServer)) {
-                                makeBranchServer(currentServer, startingPort++);
+                for (int i = 0; i < serversOnCurrentLine.length; i++) {
+			String currentServer = serversOnCurrentLine[i];
+
+			if (null == alreadyCreatedServerList.get(currentServer)) {
+				makeBranchServer(currentServer, startingPort++);
                         }
 
-                        if ((i % 2) == 0) {
-				System.out.println("adding comm link");
-                                // Allow communication from first server on current line to second server on current line
-                                allowOneDirectionalCommunication(serversOnCurrentLine[i-1],serversOnCurrentLine[i]);
-				System.out.println("done adding comm link");
-                        }
+			if (i > 0) {
+				// Allow communication from first server on current line to second server on current line
+				allowOneDirectionalCommunication(serversOnCurrentLine[0],serversOnCurrentLine[i]);
+			}
                 }
             }
             
@@ -71,10 +71,10 @@ public class topology {
          * Calls the makeTopology() method.    
          @param args[0] The absolute path to the file which specifies branch topology.
          */
-        public static void main(String args[]) {
-                try {
+        public static void main(String args[]) throws Exception  {
                         makeTopology(args[0]);
-                } catch (Exception e) {}
+//                try {
+//                } catch (Exception e) {}
                 
                 while (true) {
                 	try {
