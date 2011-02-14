@@ -2,24 +2,32 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+
 public class Branch_Server {
 
 	public String name = "some branch";
 	public int port = 4444;
 	public ServerThread serverThread = new ServerThread(this);
+	public Branch branch = new Branch();
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
-	public HashMap<String, Branch_Server> branches = new HashMap<String, Branch_Server>();
+	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
+	private NetworkWrapper messages = new NetworkWrapper(branches);
 
 	public Branch_Server(String name, int port) {
 		this.name = name;
 		this.port = port;
 
+		branch.name = name;
+		branch.ServPort = port;
+		branch.GUIPort = 12345;
+
 		serverThread.port = port;
 		serverThread.name = name;
+		
 	}
 
-	public void addComm(Branch_Server branch) {
+	public void addComm(Branch branch) {
 		
 		if (branches.containsKey(branch.name) || this.name == branch.name)
 			return;
@@ -81,22 +89,19 @@ public class Branch_Server {
 			else if (command.equals("d"))
 				answer = deposit(accountID, Float.parseFloat(arg4));
 			else if (command.equals("t"))
-				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
+				answer = transfer(messageID, accountID, arg4, Float.parseFloat(arg5));
 			else if (command.equals("q"))
 				answer = query(accountID);
 		}
 
 		answer = "s" + messageID + " " + answer;
 		return answer;
-    	}
+	}
 
 	public String withdrawal(String accountID, float amount) {
 		String answer = "error";
 
-		if (!validAccount(accountID)) {
-			answer = "error-account";
-			return answer;
-		}
+		checkOrCreateAccount(accountID);
 
 		if (amount < 0) {
 			answer = "error-invalid";
@@ -125,10 +130,7 @@ public class Branch_Server {
 
 		System.out.println("deposit");
 
-		if (!validAccount(accountID)) {
-			answer = "error-account";
-			return answer;
-		}
+		checkOrCreateAccount(accountID);
 
 		if (amount < 0) {
 			answer = "error-invalid";
@@ -157,16 +159,13 @@ public class Branch_Server {
 		Account account = accounts.get(accountID);
 
 		return account != null;
-    	}
+	}
 
-	public String transfer(String srcAccountID, String dstAccountID, float amount) {
+	public String transfer(String messageID, String srcAccountID, String dstAccountID, float amount) {
 		String answer = "error";
 
 		// make sure source account exists locally
-		if (!validAccount(srcAccountID, true)) {
-			answer = "error-from";
-			return answer;
-		}
+		checkOrCreateAccount(srcAccountID);
 
 		// make sure destination account exists or belongs to a branch that can be contacted
 		if (!validAccount(dstAccountID)) {
@@ -182,40 +181,57 @@ public class Branch_Server {
 			return answer;
 		}
 
+		/*
 		if (accountFrom.getBalance() < amount) {
 			answer = "error-insufficient";
 			return answer;
 		}
+		*/
 
 		accountFrom.addBalance(-amount);
-		accountTo.addBalance(amount);
+		if (validAccount(dstAccountID, true))
+			accountTo.addBalance(amount);
+		else {
+			sendTransfer(dstAccountID, messageID, amount);
+		}
 
 		answer = "ok";
 
 		return answer;
 	}
 
+	public void sendTransfer(String accountID, String messageID, float amount) {
+		String branchID = getBranchFromAccountID(accountID);
+		String message = "";
+		message = messageID + " d " + accountID + " " + amount;
+		messages.send( branchID, message );
+	}
+
+
 	public String query(String accountID) {
 		String answer = "error";
 
 		Account account = null;
 
-		if (!validAccount(accountID)) {
-			account = new Account(accountID);
-			System.out.println("Creating account with id [" + accountID + "] putting in " + account);
-			accounts.put(accountID, account);
-		}
+		checkOrCreateAccount(accountID);
 
 		answer = "q" + " " + accountID + " " + account.getBalance();
 
 		return answer;
  	}
 
+	public void checkOrCreateAccount(String accountID) {
+		if (!validAccount(accountID)) {
+			Account account = new Account(accountID);
+			accounts.put(accountID, account);
+		}
+	}
+
 }
 
 
 class ServerThread implements Runnable {
-    protected DatagramSocket socket = null;
+  protected DatagramSocket socket = null;
     protected BufferedReader in = null;
     protected boolean serverRunning = true;
 
@@ -285,5 +301,48 @@ class ServerThread implements Runnable {
 	System.out.println("Closing socket.");
         socket.close();
     }
+
+}
+
+
+class NetworkWrapper {
+
+public HashMap<String, Branch> topology = new HashMap<String, Branch>();
+
+public NetworkWrapper(HashMap<String, Branch> topology) {
+	this.topology = topology;
+}
+
+public boolean send(String branchID, String message) {
+
+	if (!topology.containsKey(branchID)) {
+		return false;
+	}
+
+	Branch branch = topology.get(branchID);
+
+	if (branch == null)
+		return false;
+
+	try {
+		DatagramSocket clientSocket = new DatagramSocket();
+		InetAddress IPAddress = InetAddress.getByName("localhost");
+		byte[] sendData = message.getBytes();
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, branch.ServPort);
+		clientSocket.send(sendPacket);
+		clientSocket.close();
+	} catch( Exception e ) {
+		return false;
+	}
+
+	return true;
+
+}
+
+	public String whoNeighbors() {
+		String result = "";
+		return result;
+	}
+
 
 }

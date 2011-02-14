@@ -1,15 +1,20 @@
 public class Branch {
 	String name;
 	String server;
-	int port;
+	int ServPort = 12345;
+	int GUIPort = 12345;
 
-	Branch(String s_name, String s_server, int n_port) {
+	Branch() {
+	}
+
+	Branch(String s_name, String s_server, int n_servport, int n_guiport) {
 		name = s_name;
 		server = s_server;
-		port = n_port;
+		ServPort = n_servport;
+		GUIPort = n_guiport;
 	}
 
 	public String toString() {
-		return name+":"+server+":"+port;
+		return name+":"+server+":"+ServPort+":"+GUIPort;
 	}
 }

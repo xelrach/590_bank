@@ -26,7 +26,7 @@ public class topology {
         private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
                 Branch_Server branchServerFrom = alreadyCreatedServerList.get(fromServer);
                 Branch_Server branchServerTo = alreadyCreatedServerList.get(toServer);
-                branchServerFrom.addComm(branchServerTo);
+                branchServerFrom.addComm(branchServerTo.branch);
                 System.out.println("Allowed communication from " + fromServer + " to " + toServer);
         }
         /**
