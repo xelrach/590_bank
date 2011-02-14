@@ -1,0 +1,9 @@
+How to use this system:
+
+1) Execute "./make"
+2) Insert desired input into sample.txt file like so:
+B1 B2
+B5 B1
+
+.. meaning that B1 can communicate with B2, and B5 can communicate with B1
+3) Execute "java topology"
