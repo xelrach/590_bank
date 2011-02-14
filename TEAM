@@ -1,6 +1,6 @@
 Charles (noneman):  I designed the message protocol. Built the original process starting script (since removed). Handled merging everyone's code. Wrote the make file.
 
-Zach (zdexter):  Created topology class that starts the system up and reads in the topology and constructs the various nodes.  Wrote TEAM and README files.
+Zach (zdexter):  Created topology class that starts the system up and reads in the topology and constructs the various nodes.  Wrote TOPO, TEAM and README files.
 
 Hui (hguo):  I wrote the ATM GUI with Swing on NetBeans IDE 6.9.1 platform. The GUI
 takes orders for users and sends the messages to its responsible server.  Only datagram client was implemented in GUI, so GUI always sends out
