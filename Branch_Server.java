@@ -263,12 +263,6 @@ class ServerThread implements Runnable {
 
 	}
 
-        try {
-            in = new BufferedReader(new FileReader("one-liners.txt"));
-        } catch (FileNotFoundException e) {
-            System.err.println("Could not open quote file. Serving time instead.");
-        }
-
         while (serverRunning) {
             try {
                 byte[] buf = new byte[256];
