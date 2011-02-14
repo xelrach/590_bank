@@ -175,10 +175,10 @@ public class Branch_Server {
 		if (!mustBeLocal && !branchID.equals(this.name)) {
 			System.out.println("account " + accountID + " is in different branch (" + branchID + ", this is " + this.name + " ... do we have access?");
 			if (branches.containsKey(branchID)) {
-				System.out.println("yes");
+				System.out.println("Yes, because neighbors are " + messages.whoNeighbors());
 				return true; // remote branch that this one can talk to
 			}
-				System.out.println("no, neighbors are " + messages.whoNeighbors());
+				System.out.println("No, neighbors are " + messages.whoNeighbors());
 		}
 
 		Account account = accounts.get(accountID);
