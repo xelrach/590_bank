@@ -46,14 +46,17 @@ public class topology {
                 String[] serversOnCurrentLine = currentLine.split(" ");
                 
                 // Loop through 
-                for (int i = 1; i <= serversOnCurrentLine.length; i++) {
+                for (int i = 1; i < serversOnCurrentLine.length; i++) {
                         String currentServer = serversOnCurrentLine[i];
                         if (null == alreadyCreatedServerList.get(currentServer)) {
-                                makeBranchServer(currentServer,startingPort++);
+                                makeBranchServer(currentServer, startingPort++);
                         }
+
                         if ((i % 2) == 0) {
+				System.out.println("adding comm link");
                                 // Allow communication from first server on current line to second server on current line
                                 allowOneDirectionalCommunication(serversOnCurrentLine[i-1],serversOnCurrentLine[i]);
+				System.out.println("done adding comm link");
                         }
                 }
             }
@@ -61,6 +64,7 @@ public class topology {
             theFis.close();
             theDis.close();
             theReader.close();
+		System.out.println("Done reading topology file.");
         }
 
         /**
