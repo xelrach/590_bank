@@ -334,8 +334,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            packet=new DatagramPacket(msg, msg.length);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -376,8 +376,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            packet=new DatagramPacket(msg, msg.length);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -425,8 +425,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            packet=new DatagramPacket(msg, msg.length);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -462,8 +462,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            packet=new DatagramPacket(msg, msg.length);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
