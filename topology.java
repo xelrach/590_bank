@@ -27,7 +27,8 @@ public class topology {
                 Branch_Server branchServerFrom = alreadyCreatedServerList.get(fromServer);
                 Branch_Server branchServerTo = alreadyCreatedServerList.get(toServer);
 
-                branchServerFrom.addComm(branchServerTo.branch);
+                branchServerFrom.addOutEdge(branchServerTo.branch);
+				branchServerTo.addInEdge(branchServerFrom.branch);
                 System.out.println("Allowed communication from " + fromServer + " to " + toServer);
         }
         /**

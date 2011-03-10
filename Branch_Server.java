@@ -6,12 +6,15 @@ import java.util.*;
 public class Branch_Server {
 
 	public String name = "some branch";
+	private int local_time = 0;
 	public int port = 4444;
 	public ServerThread serverThread = new ServerThread(this);
 	public Branch branch = new Branch();
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
-	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
+	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
+	public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
+	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
 
 	public Branch_Server(String name, int port) {
@@ -27,18 +30,35 @@ public class Branch_Server {
 		serverThread.name = name;
 		
 
-		System.out.println("branches is " + branches.toString());
-		messages = new NetworkWrapper(branches);
+		System.out.println("outNeighbors is " + outNeighbors.toString());
+		messages = new NetworkWrapper(outNeighbors);
 	}
 
-	public void addComm(Branch branch) {
-		if (branch == null || branches.containsKey(branch.name) || this.name == branch.name) {
+	/**
+	 * Adds a branch that can be communicated with
+	 */
+	public void addOutEdge(Branch branch) {
+		if (branch == null || outNeighbors.containsKey(branch.name) || this.name == branch.name) {
 			System.out.println("Not adding link");
 			return;
 		}
 
 		System.out.println("Adding link from " + this.name + " to " + branch.name);
-		branches.put(branch.name, branch);
+		outNeighbors.put(branch.name, branch);
+		return;
+	}
+
+	/**
+	 * Adds a branch that can communicate with this branch
+	 */
+	public void addInEdge(Branch branch) {
+		if (branch == null || inNeighbors.containsKey(branch.name) || this.name == branch.name) {
+			System.out.println("Not adding link");
+			return;
+		}
+
+		System.out.println("Adding link from " + branch.name + " to " + this.name);
+		inNeighbors.put(branch.name, branch);
 		return;
 	}
 
@@ -90,18 +110,68 @@ public class Branch_Server {
 
 			System.out.println("Command is [" + command + "]");
 
-			if (command.equals("w"))
+			if (command.equals("w")) {
+				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
-			else if (command.equals("d"))
+			} else if (command.equals("d")) {
+				++local_time;
 				answer = deposit(accountID, Float.parseFloat(arg4));
-			else if (command.equals("t"))
+			} else if (command.equals("t")) {
+				++local_time;
 				answer = transfer(messageID, accountID, arg4, Float.parseFloat(arg5));
-			else if (command.equals("q"))
+			} else if (command.equals("q")) {
+				++local_time;
 				answer = query(accountID);
+			}
 		}
 
 		answer = "s" + messageID + " " + answer;
 		return answer;
+	}
+
+	/** 
+	 * Handles the reception of a snapshot marker
+	 *
+	 * @param sourceBranch The branch that sent the marker.
+	 * @param originBranch The branch that started the snapshot.
+	 * @param snapshotNumber The origin branch's snapshot number.
+	 */
+	public void handleMarker(Branch sourceBranch, Branch originBranch, int snapshotNumber) {
+		String snap_name = Snapshot.getName(originBranch,snapshotNumber);
+		Snapshot snap;
+		if ( !snapshots.containsKey(Snapshot.getName(originBranch,snapshotNumber)) ) {
+			//Store the state of the branch
+			Iterator it = accounts.values().iterator();
+			ArrayList<Account> values = new ArrayList<Account>();
+			while (it.hasNext()) {
+				values.add( new Account( (Account)it.next()) );
+			}
+			snap = new Snapshot(local_time, values, originBranch, snapshotNumber);
+			snapshots.put(snap.getName(), snap);
+		} else {
+			snap = snapshots.get(snap_name);
+		}
+		snap.addMarker(originBranch);
+		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
+			sendGUISnapshot(snap);
+			snapshots.remove(snap.getName());
+		}
+	}
+
+	/**
+	 * Notifies ongoing snapshots of transfers
+	 */
+	void notifySnapshots(Account source, Account destination, float amount) {
+		for (Snapshot snap : snapshots.values()) {
+			snap.addTransfer(source, destination, amount);
+		}
+	}
+
+	/**
+	 * Sends the snapshot information to the GUI
+	 */
+	void sendGUISnapshot(Snapshot snap) {
+		//For Hui to fill in
 	}
 
 	public String withdrawal(String accountID, float amount) {
@@ -130,12 +200,7 @@ public class Branch_Server {
 	}
 
 	public String getBranchFromAccountID(String accountID) {
-		String branchID = "";
-
-		if (accountID.length() > 2)
-			branchID = accountID.substring(0, 2);
-
-		return branchID;
+		return Account.getBranchID(accountID);
 	}
 
 	public String deposit(String accountID, float amount) {
@@ -174,7 +239,7 @@ public class Branch_Server {
 		String branchID = getBranchFromAccountID(accountID);
 		if (!mustBeLocal && !branchID.equals(this.name)) {
 			System.out.println("account " + accountID + " is in different branch (" + branchID + ", this is " + this.name + " ... do we have access?");
-			if (branches.containsKey(branchID)) {
+			if (outNeighbors.containsKey(branchID)) {
 				System.out.println("Yes, because neighbors are " + messages.whoNeighbors());
 				return true; // remote branch that this one can talk to
 			}
@@ -216,12 +281,13 @@ public class Branch_Server {
 		}
 		*/
 
+		notifySnapshots(accountFrom, accountTo, amount);
 		accountFrom.addBalance(-amount);
 		if (validAccount(dstAccountID, true)) {
 			System.out.println("Local transfer of " + amount + " from " + srcAccountID + " to " + dstAccountID);
 			accountTo.addBalance(amount);
 		} else {
-			System.out.println("Transfering " + amount + " to " + dstAccountID);
+			System.out.println("Transferring " + amount + " to " + dstAccountID);
 			sendTransfer(dstAccountID, messageID, amount);
 		}
 
@@ -267,9 +333,89 @@ public class Branch_Server {
 
 }
 
+class Snapshot {
+	class Transfer {
+		Account source;
+		Account destination;
+		float amount;
+
+		public Transfer(Account src, Account dest, float moneys) {
+			source = src;
+			destination = dest;
+			amount = moneys;
+		}
+
+		public Transfer(Transfer t) {
+			source = t.source;
+			destination = t.destination;
+			amount = t.amount;
+		}
+	}
+
+	int local_time;
+	ArrayList<Account> accounts;
+	ArrayList<Transfer> transfers = new ArrayList<Transfer>();
+	HashSet<Branch> markers = new HashSet<Branch>();
+	public Branch origin;
+	public int number;
+	
+	Snapshot (int time, ArrayList<Account> accnts, Branch originBranch, int snapshotNumber) {
+		local_time = time;
+		accounts = accnts;
+		origin = originBranch;
+		number = snapshotNumber;
+	}
+
+	/**
+	 * Called when a marker message is received
+	 */
+	void addMarker(Branch sourceBranch) {
+		markers.add(sourceBranch);
+	}
+
+	/**
+	 * Called to notify the snapshot of a transfer
+	 */
+	void addTransfer(Account source, Account destination, float amount) {
+		transfers.add(new Transfer(source, destination, amount));
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Snapshot) {
+			Snapshot other = (Snapshot)o;
+			if (other.origin.equals(origin) && other.number==number) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public String getName() {
+		return getName(origin, number);
+	}
+	
+	public static String getName(Branch branch, int number) {
+		return branch.name + "." + number;
+	}
+
+	public int hashCode() {
+		return getName().hashCode();
+	}
+
+	/**
+	 * Returns true if all of the marker messages have been received
+	 */
+	public boolean isFinished(Set<Branch> inEdges) {
+		inEdges.removeAll(markers);
+		if (inEdges.isEmpty()) {
+			return true;
+		}
+		return false;
+	}
+}
 
 class ServerThread implements Runnable {
-  protected DatagramSocket socket = null;
+	protected DatagramSocket socket = null;
     protected BufferedReader in = null;
     protected boolean serverRunning = true;
 
@@ -344,41 +490,35 @@ class ServerThread implements Runnable {
 
 
 class NetworkWrapper {
+	public HashMap<String, Branch> topology = new HashMap<String, Branch>();
 
-public HashMap<String, Branch> topology = new HashMap<String, Branch>();
-
-public NetworkWrapper(HashMap<String, Branch> topology) {
-	this.topology = topology;
-}
-
-public boolean send(String branchID, String message) {
-
-	if (!topology.containsKey(branchID)) {
-		return false;
+	public NetworkWrapper(HashMap<String, Branch> topology) {
+		this.topology = topology;
 	}
 
-	Branch branch = topology.get(branchID);
+	public boolean send(String branchID, String message) {
+		if (!topology.containsKey(branchID)) {
+			return false;
+		}
 
-	if (branch == null)
-		return false;
+		Branch branch = topology.get(branchID);
+		if (branch == null)
+			return false;
+		try {
+			DatagramSocket clientSocket = new DatagramSocket();
+			InetAddress IPAddress = InetAddress.getByName("localhost");
+			byte[] sendData = message.getBytes();
 
-	try {
-		DatagramSocket clientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = message.getBytes();
+			System.out.println("Sending (to branch): " + message);
 
-		System.out.println("Sending (to branch): " + message);
-
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, branch.ServPort);
-		clientSocket.send(sendPacket);
-		clientSocket.close();
-	} catch( Exception e ) {
-		return false;
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, branch.ServPort);
+			clientSocket.send(sendPacket);
+			clientSocket.close();
+		} catch( Exception e ) {
+			return false;
+		}
+		return true;
 	}
-
-	return true;
-
-}
 
 	public String whoNeighbors() {
 		System.out.println("topology is " + topology.toString());
@@ -395,6 +535,4 @@ public boolean send(String branchID, String message) {
 
 		return result;
 	}
-
-
 }
