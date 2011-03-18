@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javax.swing.JOptionPane;
-import ServerThread;
 /**
  *
  * @author Hui Guo
@@ -558,5 +557,73 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JLabel amtlbl04;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
+
+	public String process_input(String input) {
+		
+	}
+	
+    class ServerThread implements Runnable {
+        protected DatagramSocket socket = null;
+        protected BufferedReader in = null;
+        protected boolean serverRunning = true;
+        private ATMGUI thisGUI;
+        public int port;
+        InetAddress GUIAddress;
+        int GUIPort;
+
+        public ServerThread() {
+    	    this(4444);
+        }
+
+        public ServerThread(ATMGUI thisGUI, int port) { 
+        	this.port = port;
+        	this.thisGUI = thisGUI;
+        }
+
+        public void run() {
+    	    this.port = port;
+
+        	try {
+        		socket = new DatagramSocket(port);
+        	} catch(Exception e) {
+
+        	}
+
+                while (serverRunning) {
+                    try {
+                        byte[] inbuf = new byte[256];
+
+                            // receive request
+                        DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
+                        socket.receive(packet);
+
+		
+        		// figure out response
+        		String input = new String(inbuf);
+                        String dString = thisGUI.process_input( input );
+
+		
+        		System.out.println("Sending: " + dString);
+		
+
+        		    // send the response to the client at "address" and "port"
+                        GUIAddress = packet.getAddress();
+                        GUIPort = packet.getPort();
+        		sendToGUI(dString);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+        		serverRunning = false;
+                    }
+
+        		try {
+        			Thread.sleep(100);
+        		} catch (Exception e) {
+        		}
+            }
+    	System.out.println("Closing socket.");
+            socket.close();
+        }
+
+    }
 
 }
