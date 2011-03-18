@@ -72,11 +72,11 @@ public class topology {
         		String key = branch.getKey();
         		Branch thisBranch = branch.getValue();
 
-        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches() + " &";
+        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches() + "&";
         		System.out.println(exec_string);
         		Process p = Runtime.getRuntime().exec( exec_string );
 
-        		exec_gui_string = "java ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name + " &";
+        		exec_gui_string = "java ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
         		System.out.println(exec_gui_string);
         		Process p2 = Runtime.getRuntime().exec( exec_gui_string );
         	}      
