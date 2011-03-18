@@ -87,7 +87,6 @@ public class Branch_Server {
 		String answer = "";
 
 		String[] tokens = input.split(" ");
-		String messageID = "";
 
 		char messageType = 0;
 		String command = "";
@@ -96,14 +95,14 @@ public class Branch_Server {
 		String arg5 = "";
 
 		if (tokens.length > 0) {
-			messageID = tokens[0];
+			// messageID = tokens[0];
 
 			for (int i = 0; i < tokens.length; i++) {
 				tokens[i] = tokens[i].trim();
 			}
 
-			messageType = messageID.charAt(0);
-			messageID = messageID.substring(1); // strip message type character
+			messageType = tokens[0].charAt(0);
+			// messageID = messageID.substring(1); // strip message type character
 		}
 
 		if (tokens.length > 1)
@@ -131,7 +130,7 @@ public class Branch_Server {
 				answer = deposit(accountID, Float.parseFloat(arg4));
 			} else if (command.equals("t")) {
 				++local_time;
-				answer = transfer(messageID, accountID, arg4, Float.parseFloat(arg5));
+				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
 			} else if (command.equals("s")) {
 				answer = startSnapshot();
 			} else if (command.equals("q")) {
@@ -145,7 +144,7 @@ public class Branch_Server {
 		}
 
 
-		answer = "s" + messageID + " " + answer;
+		answer = "s" + " " + answer;
 		return answer;
 	}
 
@@ -307,7 +306,7 @@ public class Branch_Server {
 		return account != null;
 	}
 
-	public String transfer(String messageID, String srcAccountID, String dstAccountID, float amount) {
+	public String transfer(String srcAccountID, String dstAccountID, float amount) {
 		String answer = "error";
 
 		if (!getBranchFromAccountID(srcAccountID).equals(this.name))
@@ -344,7 +343,7 @@ public class Branch_Server {
 			accountTo.addBalance(amount);
 		} else {
 			System.out.println("Transferring " + amount + " to " + dstAccountID);
-			sendTransfer(dstAccountID, messageID, amount);
+			sendTransfer(dstAccountID, amount);
 		}
 
 		answer = "ok";
@@ -352,10 +351,10 @@ public class Branch_Server {
 		return answer;
 	}
 
-	public void sendTransfer(String accountID, String messageID, float amount) {
+	public void sendTransfer(String accountID, float amount) {
 		String branchID = getBranchFromAccountID(accountID);
 		String message = "";
-		message = "c" + messageID + " d " + accountID + " " + amount;
+		message = "c" + " d " + accountID + " " + amount;
 		messages.send( branchID, message );
 	}
 
@@ -375,7 +374,7 @@ public class Branch_Server {
 		if (account == null)
 			return answer;
 
-		answer = "q" + " " + accountID + " " + Float.toString(account.getBalance());
+		answer = "u" + " " + accountID + " " + Float.toString(account.getBalance());
 
 		return answer;
  	}

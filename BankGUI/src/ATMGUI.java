@@ -502,8 +502,6 @@ public class ATMGUI extends javax.swing.JFrame {
         //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" q ";
         msgtemp+=acnt03.getText();
-        //msgtemp+=" ";
-        //msgtemp+=amount01.getText();
         byte[] msg=msgtemp.getBytes();
         try{
             DatagramSocket socket =new DatagramSocket();
@@ -513,12 +511,15 @@ public class ATMGUI extends javax.swing.JFrame {
             socket.send(packet);
 
             //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
             String[] respns=received.split(" ");
             if (respns.length!=4) {
+                JOptionPane.showMessageDialog(null, respns[0],"Oops",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, respns[1],"Oops",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, respns[2],"Oops",JOptionPane.ERROR_MESSAGE);
                 JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
             }else {
                 if ((respns[0].equals("s"/*+String.format("%04d", MsgID)*/)) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
