@@ -192,7 +192,12 @@ public class Branch_Server {
 	 * Sends the snapshot information to the GUI
 	 */
 	void sendGUISnapshot(Snapshot snap) {
-		//For Hui to fill in
+		String message = snap.getMessage();
+		try {
+			serverThread.sendToGUI(message);
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 
 	public String markerMessage(String arg1, String arg2, String arg3) {
@@ -445,6 +450,19 @@ class Snapshot {
 		return false;
 	}
 
+	String getMessage() {
+		String result = origin.name + "." + number + " b";
+		for (Account account : accounts) {
+			result += " " + account.id + " " + account.getBalance();
+		}
+		result += " p";
+		for (Transfer t : transfers) {
+			result += " " + t.source.id + " " + t.destination.id + " " + t.amount;
+		}
+		System.out.println(result);
+		return result;
+	}
+
 	public String getName() {
 		return getName(origin, number);
 	}
@@ -470,13 +488,15 @@ class Snapshot {
 }
 
 class ServerThread implements Runnable {
-	protected DatagramSocket socket = null;
+    protected DatagramSocket socket = null;
     protected BufferedReader in = null;
     protected boolean serverRunning = true;
 
     public String name;
     public int port;
     public Branch_Server thisBranch;
+    InetAddress GUIAddress;
+    int GUIPort;
 
     public ServerThread(Branch_Server branch) {
 	this(branch, "ServerThread", 4444);
@@ -492,6 +512,16 @@ class ServerThread implements Runnable {
 	this.port = port;
     }
 
+    public void sendToGUI(String message) throws IOException {
+        sendToGUI(message, GUIAddress, GUIPort);
+    }
+
+    public void sendToGUI(String message, InetAddress address, int port) throws IOException {
+	byte[] buf = new byte[message.length()+1];
+	buf = message.getBytes();
+	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+        socket.send(packet);
+    }
 
     public void run() {
 	this.port = port;
@@ -504,29 +534,25 @@ class ServerThread implements Runnable {
 
         while (serverRunning) {
             try {
-                byte[] buf = new byte[256];
                 byte[] inbuf = new byte[256];
 
                     // receive request
-                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
                 socket.receive(packet);
 
 		
 		// figure out response
-		String input = new String(buf);
+		String input = new String(inbuf);
                 String dString = thisBranch.process_input( input );
 
 		
 		System.out.println("Sending: " + dString);
 		
 
-                buf = dString.getBytes();
-
 		    // send the response to the client at "address" and "port"
-                InetAddress address = packet.getAddress();
-                int port = packet.getPort();
-                packet = new DatagramPacket(buf, buf.length, address, port);
-                socket.send(packet);
+                GUIAddress = packet.getAddress();
+                GUIPort = packet.getPort();
+		sendToGUI(dString);
             } catch (IOException e) {
                 e.printStackTrace();
 		serverRunning = false;
