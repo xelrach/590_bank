@@ -758,6 +758,7 @@ public class ATMGUI extends javax.swing.JFrame {
                     e.printStackTrace();
                     System.out.println(e);
     		        serverRunning = false;
+                } catch (Exception e) {
                 }
 
         		try {
