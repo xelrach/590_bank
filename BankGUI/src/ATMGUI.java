@@ -9,7 +9,7 @@
  * Created on Feb 4, 2011, 11:55:23 AM
  */
 
-//package bank;
+package bank;
 import java.io.*;
 import java.net.*;
 import java.text.*;
@@ -100,6 +100,10 @@ public class ATMGUI extends javax.swing.JFrame {
         IPTxt = new javax.swing.JTextField();
         IPLbl02 = new javax.swing.JLabel();
         PortText02 = new javax.swing.JTextField();
+        jPanel2 = new javax.swing.JPanel();
+        snapping = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        snapans = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(" Bank of COMP590");
@@ -158,7 +162,7 @@ public class ATMGUI extends javax.swing.JFrame {
 
         amtlbl04.setText("amount:");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         PortLbl01.setText("GUI ID:");
 
@@ -185,7 +189,7 @@ public class ATMGUI extends javax.swing.JFrame {
                     .addComponent(IPTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(IPLbl02)
                     .addComponent(PortText02, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -205,19 +209,53 @@ public class ATMGUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        snapping.setText("Snap");
+        snapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                snappingActionPerformed(evt);
+            }
+        });
+
+        snapans.setColumns(20);
+        snapans.setRows(5);
+        jScrollPane1.setViewportView(snapans);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .addComponent(snapping, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(snapping)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(40, 40, 40)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(33, 33, 33)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(AvLbl)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 219, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(WelcomeLbl)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(DepositBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -245,63 +283,68 @@ public class ATMGUI extends javax.swing.JFrame {
                             .addComponent(amtlbl01)
                             .addComponent(amtlbl02)
                             .addComponent(amtlbl04))))
-                .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(22, 22, 22))
+                .addGap(37, 37, 37)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(39, 39, 39)
-                .addComponent(WelcomeLbl)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(33, 33, 33)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(AvLbl)
+                        .addComponent(WelcomeLbl)
                         .addGap(18, 18, 18)
-                        .addComponent(acntlbl01))
-                    .addComponent(amtlbl01))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(DepositBtn)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(acnt01, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(amount01, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(WithdrawBtn)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(acntlbl02)
-                            .addComponent(amtlbl02))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(AvLbl)
+                                .addGap(18, 18, 18)
+                                .addComponent(acntlbl01))
+                            .addComponent(amtlbl01))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(DepositBtn)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(acnt01, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(amount01, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(WithdrawBtn)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(acntlbl02)
+                                    .addComponent(amtlbl02))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(acnt02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(amount02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                        .addComponent(acntlbl03)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(acnt02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(amount02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(6, 6, 6)
-                .addComponent(acntlbl03)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(QueryBtn)
-                    .addComponent(acnt03, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(acntlbl04)
-                    .addComponent(amtlbl04))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(TransferBtn)
-                    .addComponent(acnt04, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(amount04, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(acntlbl05)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(acnt05, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(39, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(222, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                            .addComponent(QueryBtn)
+                            .addComponent(acnt03, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(acntlbl04)
+                            .addComponent(amtlbl04))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(TransferBtn)
+                            .addComponent(acnt04, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(amount04, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(acntlbl05)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(acnt05, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(44, 44, 44))))
         );
 
         pack();
@@ -320,8 +363,8 @@ public class ATMGUI extends javax.swing.JFrame {
         }
 
         String msgtemp="c";
-        MsgID=(int)(Math.random()*10000);
-        msgtemp+=String.format("%04d", MsgID);
+        //MsgID=(int)(Math.random()*10000);
+        //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" d ";
         msgtemp+=acnt01.getText();
         msgtemp+=" ";
@@ -334,8 +377,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            packet=new DatagramPacket(msg, msg.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -362,8 +405,8 @@ public class ATMGUI extends javax.swing.JFrame {
         }
 
         String msgtemp="c";
-        MsgID=(int)(Math.random()*10000);
-        msgtemp+=String.format("%04d", MsgID);
+        //MsgID=(int)(Math.random()*10000);
+       // msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" w ";
         msgtemp+=acnt02.getText();
         msgtemp+=" ";
@@ -376,8 +419,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            packet=new DatagramPacket(msg, msg.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -409,8 +452,8 @@ public class ATMGUI extends javax.swing.JFrame {
         }
 
         String msgtemp="c";
-        MsgID=(int)(Math.random()*10000);
-        msgtemp+=String.format("%04d", MsgID);
+        //MsgID=(int)(Math.random()*10000);
+        //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" t ";
         msgtemp+=acnt04.getText();
         msgtemp+=" ";
@@ -425,8 +468,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            packet=new DatagramPacket(msg, msg.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -448,8 +491,8 @@ public class ATMGUI extends javax.swing.JFrame {
         }
 
         String msgtemp="c";
-        MsgID=(int)(Math.random()*10000);
-        msgtemp+=String.format("%04d", MsgID);
+        //MsgID=(int)(Math.random()*10000);
+        //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" q ";
         msgtemp+=acnt03.getText();
         //msgtemp+=" ";
@@ -462,8 +505,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            packet=new DatagramPacket(msg, msg.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -472,7 +515,7 @@ public class ATMGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
             else
             {
-                if ((respns[0].equals("s"+String.format("%04d", MsgID))) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
+                if ((respns[0].equals("s"/*+String.format("%04d", MsgID)*/)) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
                    JOptionPane.showMessageDialog(null, "Your account has a balance of "+respns[3],
                            "Result",JOptionPane.INFORMATION_MESSAGE);
                 else
@@ -488,6 +531,38 @@ public class ATMGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_QueryBtnActionPerformed
 
+    private void snappingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_snappingActionPerformed
+        // TODO add your handling code here:
+        String msgtemp="c";
+        msgtemp+=" s ";
+        byte[] msg=msgtemp.getBytes();
+        try{
+            DatagramSocket socket =new DatagramSocket();
+            InetAddress address=InetAddress.getByName(IPTxt.getText());
+            int port =Integer.parseInt(PortText02.getText());
+            DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
+            socket.send(packet);
+
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
+
+            String received =new String(packet.getData(),0,packet.getLength());
+
+            socket.close();
+            //
+
+            //String s="s 01.01 4 b 03.2222 12.20 p 01.2222 02.2222 1.22";
+            //snapans.setText(ProcessSnap(s));
+
+            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+
+        }
+        catch(IOException e)
+        {
+            JOptionPane.showMessageDialog(null, "Can't connect to server!","Oops",JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_snappingActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -497,6 +572,7 @@ public class ATMGUI extends javax.swing.JFrame {
                 new ATMGUI().setVisible(true);
             }
         });
+        //(new Thread(new GUIServer())).start();
         if (args.length==1)
             IPadd=args[0];
         else if(args.length == 2)
@@ -545,6 +621,101 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JLabel amtlbl02;
     private javax.swing.JLabel amtlbl04;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea snapans;
+    private javax.swing.JButton snapping;
     // End of variables declaration//GEN-END:variables
 
+    public String ProcessSnap(String packet){
+        String[] s=packet.split(" ");
+        String cont="";
+        try{
+
+        if ((!s[0].equals("s"))||(s.length<5)){
+            cont="";
+            return cont;
+        }
+        cont="Snap ID = "+s[1];
+        cont+="\r\n";
+        cont+="Ans = "+s[2];
+        cont+="\r\n";
+
+        if (!s[3].equals("b"))
+            return cont;
+
+        int i=4;
+        cont+="Account Info:\r\n";
+
+        while((!s[i].equals("p"))&&(!s[i+1].equals("p"))&&(i<s.length))
+        {
+            cont+=s[i];
+            cont+="   ";
+            i++;
+            cont+=s[i];
+            cont+="\r\n";
+            i++;
+        }
+
+        if (!s[i].equals("p"))
+            return cont;
+        i++;
+        cont+="In-process transfers:\r\n";
+        while(i<s.length-1)
+        {
+            cont+=s[i];
+            cont+="   ";
+            i++;
+            cont+=s[i];
+            cont+="   ";
+            i++;
+            cont+=s[i];
+            cont+="\r\n";
+            i++;
+        }
+        }
+        catch(Exception e){
+            cont="Wrong Format!";
+        }
+        return cont;
+    }
+
+    class GUIServer implements Runnable{
+        protected boolean running=true;
+        protected DatagramSocket socket = null;
+        public int port;
+
+        public void run(){
+            try{
+                port=Integer.parseInt(PortText02.getText());
+                socket=new DatagramSocket(port);
+            }catch(Exception e) {
+                running=false;	}
+            while(running){
+                try{
+                    byte[] buf = new byte[256];
+                    // byte[] inbuf = new byte[256];
+                    // receive request
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    socket.receive(packet);
+
+                    String input = new String(buf);
+
+                    snapans.setText(ProcessSnap(input));
+                }
+                catch(IOException e){
+                    running = false;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+            }
+            System.out.println("GUI server thread closed.");
+            socket.close();
+        }
+    }
+
 }
+
+
