@@ -3,32 +3,34 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class topology {
         private static String filePath;
         private static int startingPort = 3000;
-        private static HashMap<String,Branch_Server> alreadyCreatedServerList = new HashMap<String,Branch_Server>();
+        private static HashMap<String,Branch> alreadyCreatedServerList = new HashMap<String,Branch>();
         
         /**
-         * Invokes method on the Branch_Server class to create one branch server.      
+         * Invokes method on the Branch class to create one branch server.      
          @param serverName A string containing the unique name of the server.
          @param serverPort The server port on which to are going to bind this server instance.
          */
         private static void makeBranchServer(String serverName, int serverPort) {
-                        Branch_Server theNewServer = new Branch_Server(serverName, serverPort);
-                        theNewServer.start();
-                        // Store [String name,Branch_Server theNewServer] in the alreadyCreatedServerList
+                        Branch theNewServer = new Branch(serverName, serverPort);
+                        // Store [String name,Branch theNewServer] in the alreadyCreatedServerList
                         alreadyCreatedServerList.put(serverName, theNewServer);
                         System.out.println("Started up branch server " + serverName);
         }
         
         private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
-                Branch_Server branchServerFrom = alreadyCreatedServerList.get(fromServer);
-                Branch_Server branchServerTo = alreadyCreatedServerList.get(toServer);
+                Branch branchServerFrom = alreadyCreatedServerList.get(fromServer);
+                Branch branchServerTo = alreadyCreatedServerList.get(toServer);
 
-                branchServerFrom.addOutEdge(branchServerTo.branch);
-				branchServerTo.addInEdge(branchServerFrom.branch);
+                branchServerFrom.addOutEdge(branchServerTo);
+		branchServerTo.addInEdge(branchServerFrom);
                 System.out.println("Allowed communication from " + fromServer + " to " + toServer);
         }
         /**
@@ -62,6 +64,18 @@ public class topology {
                 }
             }
             
+
+	String exec_string = "";
+	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
+		String key = branch.getKey();
+		Branch thisBranch = branch.getValue();
+
+		exec_string = "Branch " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches();;
+		System.out.println("Spawning branch server with string " + exec_string);
+		Process branchProcess = new ProcessBuilder("java", exec_string).start();
+	}      
+
+
             theFis.close();
             theDis.close();
             theReader.close();

@@ -8,7 +8,10 @@ Account.class: Account.java
 Branch.class: Branch.java
 	javac $(OPTS) Branch.java
 
-Branch_Server.class: Branch_Server.java Branch.class Account.class
+Branch_Server_Process.class: Branch_Server_Process.java Branch.class
+	javac $(OPTS) Branch_Server_Process.java
+
+Branch_Server.class: Branch_Server.java Branch_Server_Process.class Branch.class
 	javac $(OPTS) Branch_Server.java
 
 topology.class: topology.java Branch_Server.class Branch.class
