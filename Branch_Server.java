@@ -24,7 +24,7 @@ public class Branch_Server {
 
 		branch.name = name;
 		branch.ServPort = port;
-		branch.GUIPort = 12345;
+		branch.GUIPort = port + 1000;
 
 		System.out.println("Branch name: " + name);
 		serverThread.port = port;
@@ -33,6 +33,18 @@ public class Branch_Server {
 
 		System.out.println("outNeighbors is " + outNeighbors.toString());
 		messages = new NetworkWrapper(outNeighbors);
+	}
+
+	int getGUIPort() {
+		return branch.GUIPort;
+	}
+
+	InetAddress getGUIAddress() {
+		try{
+		return InetAddress.getByName("127.0.0.1");
+		}catch (Exception e) {
+		}
+		return null;
 	}
 
 	/**
@@ -495,8 +507,6 @@ class ServerThread implements Runnable {
     public String name;
     public int port;
     public Branch_Server thisBranch;
-    InetAddress GUIAddress;
-    int GUIPort;
 
     public ServerThread(Branch_Server branch) {
 	this(branch, "ServerThread", 4444);
@@ -513,10 +523,10 @@ class ServerThread implements Runnable {
     }
 
     public void sendToGUI(String message) throws IOException {
-        sendToGUI(message, GUIAddress, GUIPort);
+        send(message, thisBranch.getGUIAddress(), thisBranch.getGUIPort());
     }
 
-    public void sendToGUI(String message, InetAddress address, int port) throws IOException {
+    public void send(String message, InetAddress address, int port) throws IOException {
 	byte[] buf = new byte[message.length()+1];
 	buf = message.getBytes();
 	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
@@ -550,9 +560,9 @@ class ServerThread implements Runnable {
 		
 
 		    // send the response to the client at "address" and "port"
-                GUIAddress = packet.getAddress();
-                GUIPort = packet.getPort();
-		sendToGUI(dString);
+                InetAddress address = packet.getAddress();
+                int port = packet.getPort();
+		send(dString,address,port);
             } catch (IOException e) {
                 e.printStackTrace();
 		serverRunning = false;
