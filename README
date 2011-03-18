@@ -1,11 +1,11 @@
-
 How to use this system:
 
-1) Execute "make"
-2) Insert desired branch-link input into TOPO file like so:
+1) Insert desired branch-link input into TOPO file like so:
 01 02
 05 01
-
 .. meaning that branch 01 can communicate with branch 02, and branch 05 can communicate with branch 01
-3) Execute "java topology TOPO"
+
+2) python test.py (if you rename the topology file to something besides topo, use--topology=TOPO_NEW_FILE_NAME)
+	- this script will run ./make for you
+	- then the script will start up branch servers and GUIs by running java topology <TOPO_FILE_NAME>
 
