@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javax.swing.JOptionPane;
+import ServerThread;
 /**
  *
  * @author Hui Guo
@@ -30,6 +31,14 @@ public class ATMGUI extends javax.swing.JFrame {
     public static String port02="";
     public static int MsgID=1000;
 
+	public void start() {
+		if (serverThread != null) {
+			Thread thread = new Thread(serverThread);
+			thread.start();
+		}
+		System.out.println("Done starting GUI Server thread for GUI ID " + GUI_Id);
+	}
+	
     public static boolean isAccount(String str)
     {
         Pattern pattern=Pattern.compile("[0-9][0-9]\\.[0-9][0-9][0-9][0-9][0-9]");
