@@ -19,19 +19,19 @@ public class topology {
          @param serverPort The server port on which to are going to bind this server instance.
          */
         private static void makeBranchServer(String serverName, int serverPort) {
-                        Branch theNewServer = new Branch(serverName, serverPort);
-                        // Store [String name,Branch theNewServer] in the alreadyCreatedServerList
-                        alreadyCreatedServerList.put(serverName, theNewServer);
-                        System.out.println("Started up branch server " + serverName);
+            Branch theNewServer = new Branch(serverName, serverPort);
+            // Store [String name,Branch theNewServer] in the alreadyCreatedServerList
+            alreadyCreatedServerList.put(serverName, theNewServer);
+            System.out.println("Started up branch server " + serverName);
         }
         
         private static void allowOneDirectionalCommunication(String fromServer, String toServer) {
-                Branch branchServerFrom = alreadyCreatedServerList.get(fromServer);
-                Branch branchServerTo = alreadyCreatedServerList.get(toServer);
+            Branch branchServerFrom = alreadyCreatedServerList.get(fromServer);
+            Branch branchServerTo = alreadyCreatedServerList.get(toServer);
 
-                branchServerFrom.addOutEdge(branchServerTo);
-		branchServerTo.addInEdge(branchServerFrom);
-                System.out.println("Allowed communication from " + fromServer + " to " + toServer);
+            branchServerFrom.addOutEdge(branchServerTo);
+	        branchServerTo.addInEdge(branchServerFrom);
+            System.out.println("Allowed communication from " + fromServer + " to " + toServer);
         }
         /**
          * Creates the various BranchServers based upon the relationships specified in inputFilePath.              
@@ -65,21 +65,21 @@ public class topology {
             }
             
 
-	String exec_string = "";
-	String exec_gui_string = "";
+        	String exec_string = "";
+        	String exec_gui_string = "";
 
-	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
-		String key = branch.getKey();
-		Branch thisBranch = branch.getValue();
+        	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
+        		String key = branch.getKey();
+        		Branch thisBranch = branch.getValue();
 
-		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches();
-		System.out.println(exec_string);
-		Process p = Runtime.getRuntime().exec( exec_string );
+        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches();
+        		System.out.println(exec_string);
+        		Process p = Runtime.getRuntime().exec( exec_string );
 
-		exec_gui_string = "java ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
-		System.out.println(exec_gui_string);
-		Process p2 = Runtime.getRuntime().exec( exec_gui_string );
-	}      
+        		exec_gui_string = "java ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
+        		System.out.println(exec_gui_string);
+        		Process p2 = Runtime.getRuntime().exec( exec_gui_string );
+        	}      
 
 
             theFis.close();
@@ -93,17 +93,6 @@ public class topology {
          @param args[0] The absolute path to the file which specifies branch topology.
          */
         public static void main(String args[]) throws Exception  {
-                        makeTopology(args[0]);
-//                try {
-//                } catch (Exception e) {}
-                
-                while (true) {
-                	try {
-                		java.lang.Thread.currentThread();
-						Thread.sleep(3600000);
-                	} catch (Exception e) {
-                		// e.printStackTrace();
-                	}
-                }
+            makeTopology(args[0]);
         }
 }
