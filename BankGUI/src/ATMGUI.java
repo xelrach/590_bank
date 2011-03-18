@@ -113,6 +113,7 @@ public class ATMGUI extends javax.swing.JFrame {
         AvLbl.setText("Available actions:");
 
         DepositBtn.setText("Deposit");
+        acnt01.setText(GUI_Id+".");
         DepositBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DepositBtnActionPerformed(evt);
@@ -431,7 +432,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
