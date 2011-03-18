@@ -121,6 +121,7 @@ public class ATMGUI extends javax.swing.JFrame {
         });
 
         WithdrawBtn.setText("Withdraw");
+        acnt02.setText(GUI_Id+".");
         WithdrawBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WithdrawBtnActionPerformed(evt);
@@ -311,7 +312,7 @@ public class ATMGUI extends javax.swing.JFrame {
     private void DepositBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DepositBtnActionPerformed
         if (!isAccount(acnt01.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!isDouble(amount01.getText()))
@@ -353,7 +354,7 @@ public class ATMGUI extends javax.swing.JFrame {
     private void WithdrawBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WithdrawBtnActionPerformed
         if (!isAccount(acnt02.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!isDouble(amount02.getText()))
@@ -383,7 +384,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -444,7 +445,7 @@ public class ATMGUI extends javax.swing.JFrame {
     private void QueryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_QueryBtnActionPerformed
         if (!isAccount(acnt03.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -469,10 +470,9 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             String[] respns=received.split(" ");
-            if (respns.length!=4)
+            if (respns.length!=4) {
                 JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
-            else
-            {
+            } else {
                 if ((respns[0].equals("s"+String.format("%04d", MsgID))) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
                    JOptionPane.showMessageDialog(null, "Your account has a balance of "+respns[3],
                            "Result",JOptionPane.INFORMATION_MESSAGE);
@@ -485,6 +485,8 @@ public class ATMGUI extends javax.swing.JFrame {
         catch(IOException e)
         {
             JOptionPane.showMessageDialog(null, "Can't connect to server!","Oops",JOptionPane.ERROR_MESSAGE);
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "Balance was not returned","Oops",JOptionPane.ERROR_MESSAGE);
         }
         // TODO add your handling code here:
     }//GEN-LAST:event_QueryBtnActionPerformed
