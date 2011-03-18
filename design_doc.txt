@@ -1,5 +1,4 @@
 Messages are to be formed as follows:
-The first part is the vector clock, which is comma seperated list of the values for each branch.
 The second part is a letter that represents a response (s) or a request (c).
 ie:
 c - For a client request
@@ -12,28 +11,28 @@ Withdrawal:
 Arguments are an account number and an amount
 Response should be a query response for the resulting amount in the account
 ie:
-2,1,4,5 c w 01.00001 20.3
+c w 01.00001 20.3
 Would withdraw 20.3 into account 01.00001
 
 Deposit:
 Arguments are an account number and an amount
 Response should be a query response for the resulting amount in the account
 ie:
-2,2,4,6 d 01.00001 12.1
+d 01.00001 12.1
 Would deposit 12.1 in 01.0001
 
 Transfer:
 Arguments are a from account, a to account, and a amount
 Response is ???
 ie:
-2,2,4,7 c t 01.00001 03.00020 34.23
+c t 01.00001 03.00020 34.23
 Would transfer 34.23 from 01.00001 to 03.00020
 
 Query:
 Arguments are an account
 Response is a query response with the amount in the account
 ie:
-3,4,5,7 c q 01.00001
+q 01.00001
 Would return the amount in account 01.00001
 
 
@@ -42,7 +41,7 @@ Responses:
 
 Query:
 ie:
-3,4,5,8 s q 01.00001 200.23
+s q 01.00001 200.23
 Would say that there is 220.23 in account 01.00001
 
 
@@ -51,9 +50,4 @@ Markers:
 marker branch_ID.snapshot_ID
 
 Snapshot Response:
-Snapshot branch_ID.snapshot_ID ans
-account_number value
-...
-In Process
-t 02.11111 03.12345 1015
-...
+s branch_ID.snapshot_ID ans b account_number value account_number value ... p account_number1 account_number2 transfer_amount ...
