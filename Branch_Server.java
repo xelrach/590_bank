@@ -10,6 +10,7 @@ public class Branch_Server {
 	public int port = 4444;
 	public ServerThread serverThread = new ServerThread(this);
 	public Branch branch = new Branch();
+	public int lastSnapshot = 0;
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
@@ -119,15 +120,35 @@ public class Branch_Server {
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(messageID, accountID, arg4, Float.parseFloat(arg5));
+			} else if (command.equals("s")) {
+				answer = startSnapshot();
 			} else if (command.equals("q")) {
 				++local_time;
 				answer = query(accountID);
 			}
+		} else if (messageType == 's') {
+			if (command.equals("m")) {
+				answer = markerMessage( tokens[2], tokens[3], tokens[4] );
+			}
 		}
+
 
 		answer = "s" + messageID + " " + answer;
 		return answer;
 	}
+
+	/** 
+	 * Start a snapshot
+	 */
+	public String startSnapshot() {
+		int snapshotID = lastSnapshot + 1;
+		lastSnapshot = snapshotID;
+		handleMarker(null, this.branch, snapshotID);
+		transmitMarker(this.branch.name, snapshotID);
+
+		return "ok";
+	}
+
 
 	/** 
 	 * Handles the reception of a snapshot marker
@@ -177,6 +198,24 @@ public class Branch_Server {
 		} catch (Exception e) {
 			System.err.println(e);
 		}
+	}
+
+	public String markerMessage(String arg1, String arg2, String arg3) {
+		String result = "";
+
+		Branch source = inNeighbors.get(arg1);
+		if (source == null)
+			return "invalidSource";
+
+		Branch origin = inNeighbors.get(arg2);
+		if (origin == null)
+			return "invalidOrigin";
+
+		int snapshotID = Integer.parseInt(arg3);
+
+		handleMarker(source, origin, snapshotID);
+
+		return "ok";
 	}
 
 	public String withdrawal(String accountID, float amount) {
@@ -336,6 +375,21 @@ public class Branch_Server {
 		}
 	}
 
+
+	/**
+	 * Send a marker to all out edges
+	 */
+	void transmitMarker(String originBranch, int snapshotID) {
+		String message = "s m " + name + " " + originBranch + " " + snapshotID;
+
+		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
+                	String key = branch.getKey();
+			Branch outBranch = branch.getValue();
+
+	                messages.send( outBranch.name, message );
+		}
+	}
+
 }
 
 class Snapshot {
@@ -377,6 +431,7 @@ class Snapshot {
 	void addMarker(Branch sourceBranch) {
 		markers.add(sourceBranch);
 	}
+
 
 	/**
 	 * Called to notify the snapshot of a transfer
