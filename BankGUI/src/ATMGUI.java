@@ -701,9 +701,7 @@ public class ATMGUI extends javax.swing.JFrame {
     }
 
 	public void start() {
-	    JOptionPane.showMessageDialog(null, "SPHT", "Oops", JOptionPane.ERROR_MESSAGE);
 		if (serverThread != null) {
-		    JOptionPane.showMessageDialog(null, "HAHA", "Oops", JOptionPane.ERROR_MESSAGE);
 			Thread thread = new Thread(serverThread);
 			thread.start();
 		}
