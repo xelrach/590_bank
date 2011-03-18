@@ -11,7 +11,11 @@ Branch.class: Branch.java
 Branch_Server_Process.class: Branch_Server_Process.java Branch.class
 	javac $(OPTS) Branch_Server_Process.java
 
-GUI_Server_Process.class: GUI_Server_Process.java ATMGUI.java
+ATMGUI.class: BankGUI/src/ATMGUI.java BankGUI/src/ATMGUI.form
+	ant -f BankGUI/build.xml
+	cp BankGUI/build/classes/ATMGUI*.class ./
+
+GUI_Server_Process.class: GUI_Server_Process.java ATMGUI.class
 	javac $(OPTS) GUI_Server_Process.java
 
 Branch_Server.class: Branch_Server.java Branch_Server_Process.class Branch.class
@@ -19,7 +23,3 @@ Branch_Server.class: Branch_Server.java Branch_Server_Process.class Branch.class
 
 topology.class: topology.java Branch_Server.class Branch.class
 	javac $(OPTS) topology.java
-
-ATMGUI.class: BankGUI/src/ATMGUI.java BankGUI/src/ATMGUI.form
-	ant -f BankGUI/build.xml
-	cp BankGUI/build/classes/ATMGUI*.class ./
