@@ -21,6 +21,8 @@ def main():
     output, errors = p1.communicate()
     print output
     print errors
+    
+    
 
 if __name__ == '__main__':
     main()

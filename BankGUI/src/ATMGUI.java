@@ -29,15 +29,7 @@ public class ATMGUI extends javax.swing.JFrame {
     public static String IPadd="";
     public static String port02="";
     public static int MsgID=1000;
-    ServerThread serverThread;
-
-	public void start() {
-		if (serverThread != null) {
-			Thread thread = new Thread(serverThread);
-			thread.start();
-		}
-		System.out.println("Done starting GUI Server thread for GUI ID " + GUI_Id);
-	}
+    public ServerThread serverThread = new ServerThread(this);
 	
     public static boolean isAccount(String str)
     {
@@ -61,7 +53,10 @@ public class ATMGUI extends javax.swing.JFrame {
         }
     }
 
-    public ATMGUI() {
+    public ATMGUI(String IPadd, String port02, String GUI_Id) {
+        this.IPadd = IPadd;
+        this.port02 = port02;
+        this.GUI_Id = GUI_Id;
         initComponents();
         if (!IPadd.equals(""))
             IPTxt.setText(IPadd);
@@ -69,6 +64,7 @@ public class ATMGUI extends javax.swing.JFrame {
             PortText01.setText(GUI_Id);
         if (!port02.equals(""))
             PortText02.setText(port02);
+        start();
     }
 
     /** This method is called from within the constructor to
@@ -394,7 +390,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -532,7 +528,7 @@ public class ATMGUI extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
             }
             socket.close();
-            //JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            //JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -566,7 +562,7 @@ public class ATMGUI extends javax.swing.JFrame {
             //String s="s 01.01 4 b 03.2222 12.20 p 01.2222 02.2222 1.22";
             //snapans.setText(ProcessSnap(s));
 
-            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
 
         }
         catch(IOException e)
@@ -574,34 +570,6 @@ public class ATMGUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Can't connect to server!","Oops",JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_snappingActionPerformed
-
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ATMGUI().setVisible(true);
-            }
-        });
-        //(new Thread(new GUIServer())).start();
-        if (args.length==1)
-            IPadd=args[0];
-        else if(args.length == 2)
-        {
-            IPadd=args[0];
-            port02=args[1];
-        }
-        else if (args.length ==3)
-        {
-            IPadd=args[0];
-            port02=args[1];
-            GUI_Id=args[2];
-        }
-        else
-        {
-        }
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AvLbl;
@@ -639,8 +607,8 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JButton snapping;
     // End of variables declaration//GEN-END:variables
 
-	public String process_input(String input) {
-		return "";	
+	public void process_input(String input) {
+		snapans.setText("Response was:\n" + input);
 	}
 
     public String ProcessSnap(String packet){
@@ -732,6 +700,16 @@ public class ATMGUI extends javax.swing.JFrame {
         }
     }
 
+	public void start() {
+	    JOptionPane.showMessageDialog(null, "SPHT", "Oops", JOptionPane.ERROR_MESSAGE);
+		if (serverThread != null) {
+		    JOptionPane.showMessageDialog(null, "HAHA", "Oops", JOptionPane.ERROR_MESSAGE);
+			Thread thread = new Thread(serverThread);
+			thread.start();
+		}
+		System.out.println("Done starting GUI thread");
+	}
+	
     class ServerThread implements Runnable {
         protected DatagramSocket socket = null;
         protected BufferedReader in = null;
@@ -741,54 +719,57 @@ public class ATMGUI extends javax.swing.JFrame {
         InetAddress GUIAddress;
         int GUIPort;
 
-        public ServerThread() {
+        public ServerThread(ATMGUI thisGUI) {
+            this.thisGUI = thisGUI;
         }
 
+        /*
         public ServerThread(ATMGUI thisGUI, int port) { 
         	this.port = port;
         	this.thisGUI = thisGUI;
         }
-
+        */
+        
         public void run() {
-    	    this.port = port;
+            Integer theGUIport = Integer.parseInt(port02.trim());
+            theGUIport += 1000;
+    	    this.port = theGUIport;
 
         	try {
         		socket = new DatagramSocket(port);
         	} catch(Exception e) {
-
+                System.out.println("socket error!");
         	}
 
-                while (serverRunning) {
-                    try {
-                        byte[] inbuf = new byte[256];
+            while (serverRunning) {
+                try {
+                    byte[] inbuf = new byte[256];
 
-                            // receive request
-                        DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
-                        socket.receive(packet);
+                    // receive request
+                    DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
+                    socket.receive(packet);
 
-		
-        		// figure out response
-        		String input = new String(inbuf);
-                        String dString = thisGUI.process_input( input );
-
-		
-        		System.out.println("Sending: " + dString);
-		
-
+            		// figure out response
+            		String input = new String(inbuf);
+                    thisGUI.process_input( input );
+	
         		    // send the response to the client at "address" and "port"
-                        GUIAddress = packet.getAddress();
-                        GUIPort = packet.getPort();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-        		serverRunning = false;
-                    }
+                    GUIAddress = packet.getAddress();
+                    GUIPort = packet.getPort();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println(e);
+    		        serverRunning = false;
+                }
 
         		try {
         			Thread.sleep(100);
         		} catch (Exception e) {
+        		    System.out.println(e);
         		}
             }
-    	System.out.println("Closing socket.");
+            
+    	    System.out.println("Closing socket.");
             socket.close();
         }
 

@@ -76,7 +76,7 @@ public class topology {
         		System.out.println(exec_string);
         		Process p = Runtime.getRuntime().exec( exec_string );
 
-        		exec_gui_string = "java ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
+        		exec_gui_string = "java GUI_Server_Process 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
         		System.out.println(exec_gui_string);
         		Process p2 = Runtime.getRuntime().exec( exec_gui_string );
         	}      
@@ -85,7 +85,7 @@ public class topology {
             theFis.close();
             theDis.close();
             theReader.close();
-		System.out.println("Done reading topology file.");
+		    System.out.println("Done reading topology file.");
         }
 
         /**

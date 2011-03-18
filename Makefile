@@ -1,6 +1,6 @@
 OPTS=-g
 
-all: Account.class Branch_Server.class Branch_Server_Process.class topology.class ATMGUI.class
+all: Account.class Branch_Server.class Branch_Server_Process.class GUI_Server_Process.class topology.class ATMGUI.class
 
 Account.class: Account.java
 	javac $(OPTS) Account.java
@@ -10,6 +10,9 @@ Branch.class: Branch.java
 
 Branch_Server_Process.class: Branch_Server_Process.java Branch.class
 	javac $(OPTS) Branch_Server_Process.java
+
+GUI_Server_Process.class: GUI_Server_Process.java
+	javac $(OPTS) GUI_Server_Process.java
 
 Branch_Server.class: Branch_Server.java Branch_Server_Process.class Branch.class
 	javac $(OPTS) Branch_Server.java
