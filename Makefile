@@ -1,6 +1,6 @@
 OPTS=-g
 
-all: Account.class Branch_Server.class topology.class ATMGUI.class
+all: Account.class Branch_Server.class Branch_Server_Process.class topology.class ATMGUI.class
 
 Account.class: Account.java
 	javac $(OPTS) Account.java
