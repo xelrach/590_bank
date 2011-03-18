@@ -66,13 +66,18 @@ public class topology {
             
 
 	String exec_string = "";
+	String exec_gui_string = "";
+
 	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
 		String key = branch.getKey();
 		Branch thisBranch = branch.getValue();
 
-		exec_string = "Branch " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches();;
+		exec_string = "Branch " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches();
 		System.out.println("Spawning branch server with string " + exec_string);
 		Process branchProcess = new ProcessBuilder("java", exec_string).start();
+
+		exec_gui_string = "bank/ATMGUI 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
+		Process guiProcess = new ProcessBuilder("java", exec_gui_string).start();
 	}      
 
 
