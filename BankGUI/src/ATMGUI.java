@@ -510,16 +510,14 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
+            byte[] buf = new byte[64];
+            packet=new DatagramPacket(buf, buf.length);
             socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
             String[] respns=received.split(" ");
             if (respns.length!=4) {
-                JOptionPane.showMessageDialog(null, respns[0],"Oops",JOptionPane.ERROR_MESSAGE);
-                JOptionPane.showMessageDialog(null, respns[1],"Oops",JOptionPane.ERROR_MESSAGE);
-                JOptionPane.showMessageDialog(null, respns[2],"Oops",JOptionPane.ERROR_MESSAGE);
                 JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
             }else {
                 if ((respns[0].equals("s"/*+String.format("%04d", MsgID)*/)) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
@@ -608,10 +606,6 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JButton snapping;
     // End of variables declaration//GEN-END:variables
 
-	public void process_input(String input) {
-		snapans.setText("Response was:\n" + input);
-	}
-
     public String ProcessSnap(String packet){
         String[] s=packet.split(" ");
         String cont="";
@@ -665,6 +659,11 @@ public class ATMGUI extends javax.swing.JFrame {
         return cont;
     }
 
+	public void process_input(String input) {
+		snapans.setText("Response was:\n" + ProcessSnap(input));
+	}
+	
+    // The GUIServer class is currently not being used anywhere
     class GUIServer implements Runnable{
         protected boolean running=true;
         protected DatagramSocket socket = null;

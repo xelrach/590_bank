@@ -374,7 +374,7 @@ public class Branch_Server {
 		if (account == null)
 			return answer;
 
-		answer = "u" + " " + accountID + " " + Float.toString(account.getBalance());
+		answer = "q" + " " + accountID + " " + Float.toString(account.getBalance());
 
 		return answer;
  	}
