@@ -136,6 +136,7 @@ public class ATMGUI extends javax.swing.JFrame {
 		this.addWindowListener(new java.awt.event.WindowAdapter(){
 			public void windowClosing(java.awt.event.WindowEvent we){
 				killServer();
+				serverThread.serverRunning = false;
 				System.exit(0);
 			}
 		});
