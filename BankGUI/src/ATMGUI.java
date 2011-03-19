@@ -702,9 +702,10 @@ public class ATMGUI extends javax.swing.JFrame {
                 try {
                     byte[] inbuf = new byte[256];
                     
+                    DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
                     socket.receive(packet);
+                    
                     String input = new String(inbuf);
-
                     snapans.setText(ProcessSnap(input));
                     
                 } catch (IOException e) {
