@@ -67,6 +67,18 @@ public class ATMGUI extends javax.swing.JFrame {
         start();
     }
 
+	private void killServer() {
+        byte[] msg="c k".getBytes();
+        try{
+            DatagramSocket socket =new DatagramSocket();
+            InetAddress address=InetAddress.getByName(IPTxt.getText());
+            int port =Integer.parseInt(PortText02.getText());
+            DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
+            socket.send(packet);
+            socket.close();
+		} catch (Exception e) {}
+	}
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -121,6 +133,12 @@ public class ATMGUI extends javax.swing.JFrame {
         AvLbl.setForeground(new java.awt.Color(51, 0, 255));
         AvLbl.setText("Available actions:");
 
+		this.addWindowListener(new java.awt.event.WindowAdapter(){
+			public void windowClosing(java.awt.event.WindowEvent we){
+				killServer();
+				System.exit(0);
+			}
+		});
         DepositBtn.setText("Deposit");
         acnt01.setText(GUI_Id+".");
         DepositBtn.addActionListener(new java.awt.event.ActionListener() {

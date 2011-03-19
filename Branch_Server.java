@@ -153,6 +153,8 @@ public class Branch_Server {
 			} else if (command.equals("q")) {
 				++local_time;
 				answer = query(accountID);
+			} else if (command.equals("k")) {
+				System.exit(0);
 			}
 		} else if (messageType == 's') {
 			if (command.equals("m")) {
