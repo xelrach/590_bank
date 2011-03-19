@@ -175,21 +175,21 @@ public class Branch_Server {
 	public String startSnapshot() {
 		int snapshotID = lastSnapshot + 1;
 		lastSnapshot = snapshotID;
-		handleMarker(null, this.branch, snapshotID);
 		transmitMarker(this.branch.name, snapshotID);
-
+		handleMarker(null, this.branch, snapshotID);
 		return "ok";
 	}
 
 
 	/** 
-	 * Handles the reception of a snapshot marker
+	 * Handles the reception of a snapshot marker.
 	 *
 	 * @param sourceBranch The branch that sent the marker.
 	 * @param originBranch The branch that started the snapshot.
 	 * @param snapshotNumber The origin branch's snapshot number.
 	 */
 	public void handleMarker(Branch sourceBranch, Branch originBranch, int snapshotNumber) {
+//		assert originBranch.getName()=="01";
 		String snap_name = Snapshot.getName(originBranch,snapshotNumber);
 		Snapshot snap;
 		if ( !snapshots.containsKey(Snapshot.getName(originBranch,snapshotNumber)) ) {
@@ -213,10 +213,33 @@ public class Branch_Server {
 		snap.addMarker(sourceBranch);
 		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
 			sendGUISnapshot(snap);
-			snapshots.remove(snap.getName());
+//			snapshots.remove(snap.getName());
 		}
 	}
 
+	public boolean snapExists(Branch originBranch, int snapshotNumber) {
+		String snap_name = Snapshot.getName(originBranch,snapshotNumber);
+		System.out.print(snap_name);
+		if ( snapshots.containsKey(snap_name) ) {
+			System.out.println(" exists");
+			return true;
+		}
+		System.out.println(" doesn't exist.");
+		return false;
+	}
+/*
+	public boolean snapFinished(Branch originBranch, int snapshotNumber) {
+		return snapFinished(Snapshot.getName(originBranch,snapshotNumber));
+	}
+
+	public boolean snapFinished(String snap_name) {
+		if ( !snapshots.containsKey(snap_name) ) {
+			return false;
+		}
+		Snapshot snap = snapshots.get(snap_name);
+		return snap.isFinished( new HashSet<Branch>(inNeighbors.values()) );
+	}
+*/
 	/**
 	 * Notifies ongoing snapshots of transfers
 	 */
@@ -250,10 +273,10 @@ public class Branch_Server {
 			return "invalidOrigin";
 
 		int snapshotID = Integer.parseInt(arg3);
-
+		if (!snapExists(origin, snapshotID)) {
+			transmitMarker(this.branch.name, snapshotID);
+		}
 		handleMarker(source, origin, snapshotID);
-		transmitMarker(this.branch.name, snapshotID);
-
 		return "ok";
 	}
 
@@ -560,8 +583,8 @@ class ServerThread implements Runnable {
 	byte[] buf = new byte[message.length()];
 	buf = message.getBytes();
 	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
-	log.log(Level.INFO, name + " sending " + message);
-	System.out.println(name + " sending " + message);
+	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
+	System.out.println(name + " sending " + message + " to port: " + port);
         socket.send(packet);
     }
 
