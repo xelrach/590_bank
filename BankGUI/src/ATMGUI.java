@@ -659,47 +659,6 @@ public class ATMGUI extends javax.swing.JFrame {
         return cont;
     }
 
-	public void process_input(String input) {
-		snapans.setText("Response was:\n" + ProcessSnap(input));
-	}
-	
-    // The GUIServer class is currently not being used anywhere
-    class GUIServer implements Runnable{
-        protected boolean running=true;
-        protected DatagramSocket socket = null;
-        public int port;
-
-        public void run(){
-            try{
-                port=Integer.parseInt(PortText02.getText());
-                socket=new DatagramSocket(port);
-            }catch(Exception e) {
-                running=false;	}
-            while(running){
-                try{
-                    byte[] buf = new byte[256];
-                    // byte[] inbuf = new byte[256];
-                    // receive request
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                    socket.receive(packet);
-
-                    String input = new String(buf);
-
-                    snapans.setText(ProcessSnap(input));
-                }
-                catch(IOException e){
-                    running = false;
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                }
-            }
-            System.out.println("GUI server thread closed.");
-            socket.close();
-        }
-    }
-
 	public void start() {
 		if (serverThread != null) {
 			Thread thread = new Thread(serverThread);
@@ -734,7 +693,7 @@ public class ATMGUI extends javax.swing.JFrame {
     	    this.port = theGUIport;
 
         	try {
-        		socket = new DatagramSocket(port);
+        		socket = new DatagramSocket(Integer.parseInt(port02.trim()));
         	} catch(Exception e) {
                 System.out.println("socket error!");
         	}
@@ -742,18 +701,12 @@ public class ATMGUI extends javax.swing.JFrame {
             while (serverRunning) {
                 try {
                     byte[] inbuf = new byte[256];
-
-                    // receive request
-                    DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
+                    
                     socket.receive(packet);
+                    String input = new String(inbuf);
 
-            		// figure out response
-            		String input = new String(inbuf);
-                    thisGUI.process_input( input );
-	
-        		    // send the response to the client at "address" and "port"
-                    GUIAddress = packet.getAddress();
-                    GUIPort = packet.getPort();
+                    snapans.setText(ProcessSnap(input));
+                    
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.out.println(e);
