@@ -72,13 +72,53 @@ public class topology {
         		String key = branch.getKey();
         		Branch thisBranch = branch.getValue();
 
-        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches() + "&";
+        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches() + " &";
         		System.out.println(exec_string);
-        		Process p = Runtime.getRuntime().exec( exec_string );
+        		final Process p = Runtime.getRuntime().exec( exec_string );
+			new Thread(new Runnable() {public void run() {
+				try{
+				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line;
+				while ((line = input.readLine()) != null) {
+					System.out.println(line);
+				}
+				input.close();
+				} catch(Exception e) {}
+			} } ).start();
+			new Thread(new Runnable() {public void run() {
+				try {
+				BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				String line;
+				while ((line = input.readLine()) != null) {
+					System.err.println(line);
+				}
+				input.close();
+				} catch(Exception e) {}
+			} } ).start();
 
         		exec_gui_string = "java GUI_Server_Process 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
         		System.out.println(exec_gui_string);
-        		Process p2 = Runtime.getRuntime().exec( exec_gui_string );
+        		final Process p2 = Runtime.getRuntime().exec( exec_gui_string );
+			new Thread(new Runnable() {public void run() {
+				try {
+				BufferedReader input = new BufferedReader(new InputStreamReader(p2.getInputStream()));
+				String line;
+				while ((line = input.readLine()) != null) {
+					System.out.println(line);
+				}
+				input.close();
+				} catch (Exception e) {}
+			} } ).start();
+			new Thread(new Runnable() {public void run() {
+				try {
+				BufferedReader input = new BufferedReader(new InputStreamReader(p2.getErrorStream()));
+				String line;
+				while ((line = input.readLine()) != null) {
+					System.err.println(line);
+				}
+				input.close();
+				} catch (Exception e) {}
+			} } ).start();
         	}      
 
 
