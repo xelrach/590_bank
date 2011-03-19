@@ -556,12 +556,10 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            //
-
             //String s="s 01.01 4 b 03.2222 12.20 p 01.2222 02.2222 1.22";
             snapans.setText(ProcessSnap(received));
 
-            JOptionPane.showMessageDialog(null, received,"Snapshot message delivered to Branch Server",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Snap sent to branch",JOptionPane.INFORMATION_MESSAGE);
 
         }
         catch(IOException e)
@@ -611,52 +609,52 @@ public class ATMGUI extends javax.swing.JFrame {
         String cont="";
         try{
 
-        if ((!s[0].equals("s"))||(s.length<5)){
-            cont="";
-            return cont;
-        }
-        cont="Snap ID = "+s[1];
-        cont+="\r\n";
-        cont+="Ans = "+s[2];
-        cont+="\r\n";
-
-        if (!s[3].equals("b"))
-            return cont;
-
-        int i=4;
-        cont+="Account Info:\r\n";
-
-        while((!s[i].equals("p"))&&(!s[i+1].equals("p"))&&(i<s.length))
-        {
-            cont+=s[i];
-            cont+="   ";
-            i++;
-            cont+=s[i];
+            if ((!s[0].equals("s"))||(s.length<5)){
+                cont="";
+                return cont;
+            }
+            cont="Snap ID = "+s[1];
             cont+="\r\n";
-            i++;
-        }
-
-        if (!s[i].equals("p"))
-            return cont;
-        i++;
-        cont+="In-process transfers:\r\n";
-        while(i<s.length-1)
-        {
-            cont+=s[i];
-            cont+="   ";
-            i++;
-            cont+=s[i];
-            cont+="   ";
-            i++;
-            cont+=s[i];
+            cont+="Ans = "+s[2];
             cont+="\r\n";
+
+            if (!s[3].equals("b"))
+                return cont;
+
+            int i=4;
+            cont+="Account Info:\r\n";
+
+            while((!s[i].equals("p"))&&(!s[i+1].equals("p"))&&(i<s.length))
+            {
+                cont+=s[i];
+                cont+="   ";
+                i++;
+                cont+=s[i];
+                cont+="\r\n";
+                i++;
+            }
+
+            if (!s[i].equals("p"))
+                return cont;
             i++;
-        }
+            cont+="In-process transfers:\r\n";
+            while(i<s.length-1)
+            {
+                cont+=s[i];
+                cont+="   ";
+                i++;
+                cont+=s[i];
+                cont+="   ";
+                i++;
+                cont+=s[i];
+                cont+="\r\n";
+                i++;
+            }
         }
         catch(Exception e){
             cont="Wrong Format!";
         }
-        return cont;
+       return cont;
     }
 
 	public void start() {
