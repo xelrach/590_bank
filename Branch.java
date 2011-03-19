@@ -38,6 +38,10 @@ public class Branch {
 		return name+":"+server+":"+ServPort+":"+GUIPort;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	public boolean equals(Object o) {
 		if (o instanceof Branch) {
 			Branch other = (Branch)o;

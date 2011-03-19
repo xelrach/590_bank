@@ -2,6 +2,10 @@ OPTS=-g
 
 all: Account.class Branch_Server.class Branch_Server_Process.class GUI_Server_Process.class topology.class ATMGUI.class
 
+clean:
+	rm *.class
+	rm *.log
+
 Account.class: Account.java
 	javac $(OPTS) Account.java
 

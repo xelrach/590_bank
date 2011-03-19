@@ -15,6 +15,7 @@ public class Branch_Server {
 	public Branch branch = new Branch();
 	public int lastSnapshot = 0;
 	Logger log;
+	FileHandler fh;
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
@@ -26,14 +27,16 @@ public class Branch_Server {
 		this.name = name;
 		this.port = port;
 		log = Logger.getLogger(Branch_Server.class.getName());
-		FileHandler fh = null;
+		fh = null;
 		try{
 			fh = new FileHandler("Branch_Server." + name + ".log");
 		}catch (Exception e) {
 			System.err.println(e);
 		}
-		log.addHandler(fh);
+		Logger.getLogger("").addHandler(fh);
+//		log.addHandler(fh);
 		log.setLevel(Level.ALL);
+		Logger.getLogger("").setLevel(Level.ALL);
 		fh.setFormatter(new SimpleFormatter());
 		branch.name = name;
 		branch.ServPort = port;
@@ -44,7 +47,6 @@ public class Branch_Server {
 		messages = new NetworkWrapper(outNeighbors);
 
 		log.log(Level.INFO, "Branch name: " + name + " Port: " + port);
-		log.log(Level.INFO, "outNeighbors is " + outNeighbors.toString());
 	}
 
 	int getGUIPort() {
@@ -63,6 +65,7 @@ public class Branch_Server {
 	 * Adds a branch that can be communicated with
 	 */
 	public void addOutEdge(Branch branch) {
+		log.fine("New Out Edge: " + branch.getName());
 		if (branch == null || outNeighbors.containsKey(branch.name) || this.name == branch.name) {
 			System.out.println("Not adding link");
 			return;
@@ -77,6 +80,7 @@ public class Branch_Server {
 	 * Adds a branch that can communicate with this branch
 	 */
 	public void addInEdge(Branch branch) {
+		log.fine("New In Edge: " + branch.getName());
 		if (branch == null || inNeighbors.containsKey(branch.name) || this.name == branch.name) {
 			System.out.println("Not adding link");
 			return;
@@ -92,7 +96,7 @@ public class Branch_Server {
 			Thread thread = new Thread(serverThread);
 			thread.start();
 		}
-		System.out.println("Done starting branch " + branch.name);
+		log.log(Level.INFO,"Done starting branch " + branch.name);
 	}
 
 	public String process_input(String input) {
@@ -196,7 +200,9 @@ public class Branch_Server {
 		} else {
 			snap = snapshots.get(snap_name);
 		}
-		snap.addMarker(originBranch);
+		log.log(Level.INFO, "Storing Marker For " + originBranch.getName() + "." + 
+				snapshotNumber + " from " + sourceBranch.getName());
+		snap.addMarker(sourceBranch);
 		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
 			sendGUISnapshot(snap);
 			snapshots.remove(snap.getName());
@@ -453,7 +459,9 @@ class Snapshot {
 	 * Called when a marker message is received
 	 */
 	void addMarker(Branch sourceBranch) {
-		markers.add(sourceBranch);
+		if (sourceBranch != null) {
+			markers.add(sourceBranch);
+		}
 	}
 
 
@@ -548,6 +556,7 @@ class ServerThread implements Runnable {
     }
 
     public void run() {
+		log.info(name + " is running.");
 	this.port = port;
 
 	try {
