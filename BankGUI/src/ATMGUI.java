@@ -550,8 +550,8 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+            packet=new DatagramPacket(msg, msg.length);
+            socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
@@ -559,9 +559,9 @@ public class ATMGUI extends javax.swing.JFrame {
             //
 
             //String s="s 01.01 4 b 03.2222 12.20 p 01.2222 02.2222 1.22";
-            //snapans.setText(ProcessSnap(s));
+            snapans.setText(ProcessSnap(received));
 
-            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Snapshot message delivered to Branch Server",JOptionPane.INFORMATION_MESSAGE);
 
         }
         catch(IOException e)
