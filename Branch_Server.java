@@ -1,7 +1,10 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Branch_Server {
 
@@ -11,6 +14,7 @@ public class Branch_Server {
 	public ServerThread serverThread = new ServerThread(this);
 	public Branch branch = new Branch();
 	public int lastSnapshot = 0;
+	Logger log;
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
@@ -21,18 +25,26 @@ public class Branch_Server {
 	public Branch_Server(String name, int port) {
 		this.name = name;
 		this.port = port;
-
+		log = Logger.getLogger(Branch_Server.class.getName());
+		FileHandler fh = null;
+		try{
+			fh = new FileHandler("Branch_Server." + name + ".log");
+		}catch (Exception e) {
+			System.err.println(e);
+		}
+		log.addHandler(fh);
+		log.setLevel(Level.ALL);
+		fh.setFormatter(new SimpleFormatter());
 		branch.name = name;
 		branch.ServPort = port;
 		branch.GUIPort = port + 1000;
 
-		System.out.println("Branch name: " + name);
 		serverThread.port = port;
 		serverThread.name = name;
-		
-
-		System.out.println("outNeighbors is " + outNeighbors.toString());
 		messages = new NetworkWrapper(outNeighbors);
+
+		log.log(Level.INFO, "Branch name: " + name + " Port: " + port);
+		log.log(Level.INFO, "outNeighbors is " + outNeighbors.toString());
 	}
 
 	int getGUIPort() {
@@ -84,6 +96,7 @@ public class Branch_Server {
 	}
 
 	public String process_input(String input) {
+		log.log(Level.INFO,name + " recieved " + input);
 		String answer = "";
 
 		String[] tokens = input.split(" ");
@@ -506,6 +519,7 @@ class ServerThread implements Runnable {
     public String name;
     public int port;
     public Branch_Server thisBranch;
+    Logger log = Logger.getLogger(ServerThread.class.getName());
 
     public ServerThread(Branch_Server branch) {
 	this(branch, "ServerThread", 4444);
@@ -529,6 +543,7 @@ class ServerThread implements Runnable {
 	byte[] buf = new byte[message.length()+1];
 	buf = message.getBytes();
 	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+	log.log(Level.INFO, name + " sending " + message);
         socket.send(packet);
     }
 
