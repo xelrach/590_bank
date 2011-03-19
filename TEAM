@@ -14,7 +14,7 @@ Pete (pstein): I added the branch server class, with the logic for handling requ
 Milestone #2:
 Charles (noneman):
 
-Zach (zdexter):
+Zach (zdexter):  GUI_Server_Process and associated code for ATMGUI (the GUI Server) and updated code for topology.  README and test.py test script.
 
 Hui (hguo):
 
