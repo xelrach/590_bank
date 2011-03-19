@@ -101,6 +101,7 @@ public class Branch_Server {
 
 	public String process_input(String input) {
 		log.log(Level.INFO,name + " recieved " + input);
+		System.out.println(name + " recieved " + input);
 		String answer = "";
 
 		String[] tokens = input.split(" ");
@@ -202,8 +203,12 @@ public class Branch_Server {
 		} else {
 			snap = snapshots.get(snap_name);
 		}
-		log.log(Level.INFO, "Storing Marker For " + originBranch.getName() + "." + 
-				snapshotNumber + " from " + sourceBranch.getName());
+		String notice = "Storing Marker For " + originBranch.getName() + "." + snapshotNumber;
+		if (sourceBranch!=null) {
+			notice += " from " + sourceBranch.getName();
+		}
+		log.info(notice);
+		System.out.println(notice);
 		snap.addMarker(sourceBranch);
 		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
 			sendGUISnapshot(snap);
@@ -246,6 +251,7 @@ public class Branch_Server {
 		int snapshotID = Integer.parseInt(arg3);
 
 		handleMarker(source, origin, snapshotID);
+		transmitMarker(this.branch.name, snapshotID);
 
 		return "ok";
 	}
@@ -554,6 +560,7 @@ class ServerThread implements Runnable {
 	buf = message.getBytes();
 	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 	log.log(Level.INFO, name + " sending " + message);
+	System.out.println(name + " sending " + message);
         socket.send(packet);
     }
 
