@@ -55,7 +55,7 @@ public class Branch_Server {
 
 	InetAddress getGUIAddress() {
 		try{
-		return InetAddress.getByName("127.0.0.1");
+		return InetAddress.getByName("localhost");
 		}catch (Exception e) {
 		}
 		return null;
@@ -557,7 +557,7 @@ class ServerThread implements Runnable {
     }
 
     public void send(String message, InetAddress address, int port) throws IOException {
-	byte[] buf = new byte[message.length()+1];
+	byte[] buf = new byte[message.length()];
 	buf = message.getBytes();
 	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 	log.log(Level.INFO, name + " sending " + message);
@@ -599,7 +599,10 @@ class ServerThread implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
 		serverRunning = false;
-            }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+		serverRunning = false;
+			}
 
 		try {
 			Thread.sleep(100);
