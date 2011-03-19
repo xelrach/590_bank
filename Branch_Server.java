@@ -227,19 +227,7 @@ public class Branch_Server {
 		System.out.println(" doesn't exist.");
 		return false;
 	}
-/*
-	public boolean snapFinished(Branch originBranch, int snapshotNumber) {
-		return snapFinished(Snapshot.getName(originBranch,snapshotNumber));
-	}
 
-	public boolean snapFinished(String snap_name) {
-		if ( !snapshots.containsKey(snap_name) ) {
-			return false;
-		}
-		Snapshot snap = snapshots.get(snap_name);
-		return snap.isFinished( new HashSet<Branch>(inNeighbors.values()) );
-	}
-*/
 	/**
 	 * Notifies ongoing snapshots of transfers
 	 */
@@ -274,7 +262,7 @@ public class Branch_Server {
 
 		int snapshotID = Integer.parseInt(arg3);
 		if (!snapExists(origin, snapshotID)) {
-			transmitMarker(this.branch.name, snapshotID);
+			transmitMarker(origin.name, snapshotID);
 		}
 		handleMarker(source, origin, snapshotID);
 		return "ok";
@@ -444,11 +432,13 @@ public class Branch_Server {
 	void transmitMarker(String originBranch, int snapshotID) {
 		String message = "s m " + name + " " + originBranch + " " + snapshotID;
 
+		System.out.println("");
+		System.out.println("Sending marker message: " + message);
 		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
-                	String key = branch.getKey();
+			String key = branch.getKey();
 			Branch outBranch = branch.getValue();
 
-	                messages.send( outBranch.name, message );
+			messages.send( outBranch.name, message );
 		}
 	}
 
