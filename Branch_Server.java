@@ -155,6 +155,7 @@ public class Branch_Server {
 				++local_time;
 				answer = query(accountID);
 			} else if (command.equals("k")) {
+			    this.serverThread.serverRunning = false;
 				System.exit(0);
 			}
 		} else if (messageType == 's') {
@@ -536,7 +537,7 @@ class ServerThread implements Runnable {
     public int port;
     public Branch_Server thisBranch;
     Logger log = Logger.getLogger(ServerThread.class.getName());
-
+    
     public ServerThread(Branch_Server branch) {
 	this(branch, "ServerThread", 4444);
     }
