@@ -511,7 +511,7 @@ class Snapshot {
 	}
 
 	String getMessage() {
-		String result = origin.name + "." + number + " b";
+		String result = origin.name + "." + number + " " + local_time + " b";
 		for (Account account : accounts) {
 			result += " " + account.id + " " + account.getBalance();
 		}
