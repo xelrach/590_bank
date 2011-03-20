@@ -1,4 +1,4 @@
-Edges can be uni-directional, you just have to be able to reach any node from any node.
+Edges can be uni-directional, you just have to be able to reach _any_ branch from _any_ branch through some path.
 
 So for snapshots, the following would work:
 
