@@ -11,7 +11,7 @@ public class Branch_Server {
 	public String name = "some branch";
 	private int local_time = 0;
 	public int port = 4444;
-	public ServerThread serverThread = new ServerThread(this);
+	public ServerThread serverThread;
 	public Branch branch = new Branch();
 	public int lastSnapshot = 0;
 	Logger log;
@@ -41,7 +41,7 @@ public class Branch_Server {
 		branch.name = name;
 		branch.ServPort = port;
 		branch.GUIPort = port + 1000;
-
+        serverThread =  new ServerThread(this, name, port);
 		serverThread.port = port;
 		serverThread.name = name;
 		messages = new NetworkWrapper(outNeighbors);
@@ -556,19 +556,11 @@ class ServerThread implements Runnable {
     public int port;
     public Branch_Server thisBranch;
     Logger log = Logger.getLogger(ServerThread.class.getName());
-    
-    public ServerThread(Branch_Server branch) {
-	this(branch, "ServerThread", 4444);
-    }
-
-    public ServerThread(Branch_Server branch, int port) {
-	this(branch, "ServerThread", port);
-    }
 
     public ServerThread(Branch_Server branch, String name, int port) { 
-	this.thisBranch = branch;
-	this.name = name;
-	this.port = port;
+    	this.thisBranch = branch;
+    	this.name = name;
+    	this.port = port;
     }
 
     public void sendToGUI(String message) throws IOException {
@@ -576,58 +568,61 @@ class ServerThread implements Runnable {
     }
 
     public void send(String message, InetAddress address, int port) throws IOException {
-	byte[] buf = new byte[message.length()];
-	buf = message.getBytes();
-	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
-	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
-	System.out.println(name + " sending " + message + " to port: " + port);
+    	byte[] buf = new byte[message.length()];
+    	buf = message.getBytes();
+    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+    	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
+    	System.out.println(name + " sending " + message + " to port: " + port);
         socket.send(packet);
     }
 
     public void run() {
 		log.info(name + " is running.");
-	this.port = port;
+	    this.port = port;
 
-	try {
-		socket = new DatagramSocket(port);
-	} catch(Exception e) {
+    	try {
+    		socket = new DatagramSocket(port);
+    	} catch(Exception e) {
 
-	}
+    	}
 
         while (serverRunning) {
             try {
                 byte[] inbuf = new byte[256];
 
-                    // receive request
+                // receive request
                 DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
                 socket.receive(packet);
 
-		
-		// figure out response
-		String input = new String(inbuf);
+        		// figure out response
+        		String input = new String(inbuf);
                 String dString = thisBranch.process_input( input );
-		if (dString==null) {
-			continue;
-		}
-		System.out.println("Sending: " + dString);
-		    // send the response to the client at "address" and "port"
+
+        		if (dString==null) {
+        			continue;
+        		}
+        		System.out.println("Sending: " + dString);
+        		    // send the response to the client at "address" and "port"
+
                 InetAddress address = packet.getAddress();
                 int port = packet.getPort();
-		send(dString,address,port);
-            } catch (IOException e) {
-                e.printStackTrace();
-		serverRunning = false;
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-		serverRunning = false;
-			}
+    		    send(dString,address,port);
+                } catch (IOException e) {
+                    e.printStackTrace();
+    		        serverRunning = false;
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+    		        serverRunning = false;
+    			}
 
-		try {
-			Thread.sleep(100);
-		} catch (Exception e) {
-		}
+    		try {
+    			Thread.sleep(100);
+    		} catch (Exception e) {
+    		    serverRunning = false;
+    		    System.out.println("Sleep exception caused branch server to crash");
+    		}
         }
-	System.out.println("Closing socket.");
+	    System.out.println("Closing socket.");
         socket.close();
     }
 

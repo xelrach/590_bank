@@ -626,10 +626,21 @@ public class ATMGUI extends javax.swing.JFrame {
     public String ProcessSnap(String packet){
         String[] s=packet.split(" ");
         String cont="";
+        
+        System.out.println("WE GONNA PRINT DA SNAP NOW");
+        for (int i = 0; i < s.length; i++ ){
+            cont += s[i];
+            cont += "\r\n";
+        }
+        if (2 > 1) {
+        System.out.println(cont);
+        System.out.println("DONE PRINTING SNAP");
+        return cont;
+        }
         try{
-
+            
             if ((!s[0].equals("s"))||(s.length<5)){
-                cont="";
+                cont="Snapshot started";
                 return cont;
             }
             cont="Snap ID = "+s[1];
@@ -712,9 +723,9 @@ public class ATMGUI extends javax.swing.JFrame {
 			System.out.println("GUI Listening on " + port);
         	try {
   //      		socket = new DatagramSocket(Integer.parseInt(port02.trim()));
-			socket = new DatagramSocket(port);
+			    socket = new DatagramSocket(port);
         	} catch(Exception e) {
-		System.err.println(e);
+		        System.err.println(e);
                 System.out.println("socket error!");
         	}
 
@@ -724,18 +735,20 @@ public class ATMGUI extends javax.swing.JFrame {
                     
                     DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
                     socket.receive(packet);
-		    System.out.print("GUI got message: ");
+		            System.out.print("GUI got message: ");
                     
                     String input = new String(inbuf);
-					System.out.println(input);
-			System.out.println(input);
                     snapans.setText(ProcessSnap(input));
+                    System.out.println(input);
                     
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.out.println(e);
+                    System.out.println("Error stopped GUI server (IOException)");
     		        serverRunning = false;
                 } catch (Exception e) {
+                    serverRunning = false;
+                    System.out.println("Error stopped GUI server");
                 }
 
         		try {
