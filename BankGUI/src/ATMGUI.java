@@ -703,7 +703,7 @@ public class ATMGUI extends javax.swing.JFrame {
         	this.thisGUI = thisGUI;
         }
         */
-        
+       
         public void run() {
             Integer theGUIport = Integer.parseInt(port02.trim());
             theGUIport += 1000;
@@ -711,8 +711,10 @@ public class ATMGUI extends javax.swing.JFrame {
 
 			System.out.println("GUI Listening on " + port);
         	try {
-        		socket = new DatagramSocket(Integer.parseInt(port02.trim()));
+  //      		socket = new DatagramSocket(Integer.parseInt(port02.trim()));
+			socket = new DatagramSocket(port);
         	} catch(Exception e) {
+		System.err.println(e);
                 System.out.println("socket error!");
         	}
 
@@ -722,10 +724,11 @@ public class ATMGUI extends javax.swing.JFrame {
                     
                     DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
                     socket.receive(packet);
-					System.out.println("GUI got message");
+		    System.out.print("GUI got message: ");
                     
                     String input = new String(inbuf);
 					System.out.println(input);
+			System.out.println(input);
                     snapans.setText(ProcessSnap(input));
                     
                 } catch (IOException e) {
