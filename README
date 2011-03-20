@@ -11,6 +11,8 @@ How to use this system:
 
 3) Account format:  0A.BBBBB ( A = GUI ID; BBBBB = arbitrary 5-digit account code )
 
+4) Follow the documentation in TestPlan to easily test snapshots and in-process transfers.
+
 Note that we pre-filled the Branch GUI fields with the ID of the relevant GUI where applicable.  Now it's more clear what you can and can't do.
 
 To get more verbose output, run using "java topology TOPO"
