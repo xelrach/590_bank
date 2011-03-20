@@ -627,47 +627,59 @@ public class ATMGUI extends javax.swing.JFrame {
         String[] s=packet.split(" ");
         String cont="";
         
+        /*
+        // Just some debugging code
+        
         System.out.println("WE GONNA PRINT DA SNAP NOW");
         for (int i = 0; i < s.length; i++ ){
-            cont += s[i];
-            cont += "\r\n";
+            if (s[i].equals("p")) return cont;
+            
+            if (s[i].equals("b")) {
+                cont += "Account List:\r\n";
+            }
+            
+            if (i == 2) {
+                cont += "Timestamp: " + s[i];
+            } else {
+                cont += s[i];
+                cont += "\r\n";
+            }
         }
         if (2 > 1) {
             System.out.println(cont);
             System.out.println("DONE PRINTING SNAP");
         }
+        */
         try{
-            System.out.println("GOT TO TRY BLOCK IN PROCESSSNAP");
-            
+            for (int i = 0; i < s.length; i++) {
+                s[i] = s[i].trim();
+            }
             if ((s[0].equals("s"))&&(s.length<5)){
-                cont="Snapshot started";
-                return cont;
-            }
-            cont="Snap ID = "+s[0];
-            cont+="\r\n";
-            cont+="Ans = "+s[1];
-            cont+="\r\n";
-
-            if (!s[3].equals("b"))
-                return cont;
-
-            int i=4;
-            cont+="Account Info:\r\n";
-
-            while((!s[i].equals("p"))&&(!s[i+1].equals("p"))&&(i<s.length))
-            {
-                cont+=s[i];
-                cont+="   ";
-                i++;
-                cont+=s[i];
+                cont+="Snapshot started... waiting for markers";
                 cont+="\r\n";
+                return cont;
+            }
+            cont = "Snap ID: "+s[0];
+            cont += "\r\n";
+            cont += "Ans [timestamp]: "+s[1];
+            cont += "\r\n";
+            
+            cont+="Account List:\r\n";
+            int i = 3;
+            for (i = 3; i < s.length; i++) {
+                String endMessage = "p";
+                if (s[i].equals("p")) {
+                    System.out.println("end of message");
+                    return cont;
+                }
+                cont += s[i];
+                cont += " ";
                 i++;
+                cont += s[i];
+                cont += "\r\n";
             }
 
-            if (!s[i].equals("p"))
-                return cont;
-            i++;
-            cont+="In-process transfers:\r\n";
+            cont += "In-process transfers:\r\n";
             while(i<s.length-1)
             {
                 cont+=s[i];
@@ -682,7 +694,7 @@ public class ATMGUI extends javax.swing.JFrame {
             }
         }
         catch(Exception e){
-            cont="Wrong Format!";
+            cont="Error in ProcessSnap";
             System.out.println("Error in ProcessSnap:  " + e);
         }
        return cont;
