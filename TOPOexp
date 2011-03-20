@@ -1,1 +1,14 @@
 Edges can be uni-directional, you just have to be able to reach any node from any node.
+
+So for snapshots, the following would work:
+
+01 02
+02 01
+03 02
+02 03
+
+É but the following would not allow 02 and 01 to communicate with 03:
+
+01 02
+02 01
+03 02
