@@ -643,9 +643,9 @@ public class ATMGUI extends javax.swing.JFrame {
                 cont="Snapshot started";
                 return cont;
             }
-            cont="Snap ID = "+s[1];
+            cont="Snap ID = "+s[0];
             cont+="\r\n";
-            cont+="Ans = "+s[2];
+            cont+="Ans = "+s[1];
             cont+="\r\n";
 
             if (!s[3].equals("b"))
