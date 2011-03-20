@@ -633,13 +633,13 @@ public class ATMGUI extends javax.swing.JFrame {
             cont += "\r\n";
         }
         if (2 > 1) {
-        System.out.println(cont);
-        System.out.println("DONE PRINTING SNAP");
-        return cont;
+            System.out.println(cont);
+            System.out.println("DONE PRINTING SNAP");
         }
         try{
+            System.out.println("GOT TO TRY BLOCK IN PROCESSSNAP");
             
-            if ((!s[0].equals("s"))||(s.length<5)){
+            if ((s[0].equals("s"))&&(s.length<5)){
                 cont="Snapshot started";
                 return cont;
             }
@@ -683,6 +683,7 @@ public class ATMGUI extends javax.swing.JFrame {
         }
         catch(Exception e){
             cont="Wrong Format!";
+            System.out.println("Error in ProcessSnap:  " + e);
         }
        return cont;
     }
