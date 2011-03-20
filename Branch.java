@@ -22,6 +22,10 @@ public class Branch {
 		GUIPort = other.GUIPort;
 	}
 
+	Branch(String s_name) {
+		name = s_name;
+	}
+
 	Branch(String s_name, int n_servport) {
 		name = s_name;
 		ServPort = n_servport;

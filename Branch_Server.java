@@ -101,7 +101,7 @@ public class Branch_Server {
 
 	public String process_input(String input) {
 		log.log(Level.INFO,name + " recieved " + input);
-		System.out.println(name + " recieved " + input);
+//		System.out.println(name + " recieved " + input);
 		String answer = "";
 
 		String[] tokens = input.split(" ");
@@ -213,9 +213,11 @@ public class Branch_Server {
 			notice += " from " + sourceBranch.getName();
 		}
 		log.info(notice);
-//		System.out.println(notice);
+		System.out.println(notice);
 		snap.addMarker(sourceBranch);
 		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
+			System.out.println("");
+			System.out.println("Snapshot Finsihed");
 			sendGUISnapshot(snap);
 //			snapshots.remove(snap.getName());
 		}
@@ -254,15 +256,15 @@ public class Branch_Server {
 	}
 
 	public String markerMessage(String arg1, String arg2, String arg3) {
+//		System.out.println("");
+//		System.out.println(name + " got a marker from: " + arg1 + "w/ origin " + arg2);
 		String result = "";
 
 		Branch source = inNeighbors.get(arg1);
 		if (source == null)
 			return "invalidSource";
 
-		Branch origin = inNeighbors.get(arg2);
-		if (origin == null)
-			return "invalidOrigin";
+		Branch origin = new Branch(arg2);
 
 		int snapshotID = Integer.parseInt(arg3);
 		if (!snapExists(origin, snapshotID)) {
