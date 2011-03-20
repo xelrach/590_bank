@@ -12,7 +12,7 @@ Pete (pstein): I added the branch server class, with the logic for handling requ
 
 
 Milestone #2:
-Charles (noneman): Wrote the snapshot code. Fixed lots of bugs.
+Charles (noneman): Wrote the snapshot code. Rewrite of transfer code. Fixed lots of bugs.
 
 Zach (zdexter):  GUI_Server_Process and associated code for ATMGUI (the GUI Server) and updated code for topology.  README and test.py test script.
 

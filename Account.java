@@ -33,4 +33,18 @@ public class Account {
 
 		return branchID;
 	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Account) {
+			Account other = (Account)o;
+			if (other.id.equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return id.hashCode();
+	}
 }

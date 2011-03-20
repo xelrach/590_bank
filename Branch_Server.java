@@ -161,6 +161,9 @@ public class Branch_Server {
 		} else if (messageType == 's') {
 			if (command.equals("m")) {
 				answer = markerMessage( tokens[2], tokens[3], tokens[4] );
+			} else if (command.equals("t")) {
+				++local_time;
+				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
 			}
 		}
 
@@ -353,53 +356,58 @@ public class Branch_Server {
 
 	public String transfer(String srcAccountID, String dstAccountID, float amount) {
 		String answer = "error";
+		if (getBranchFromAccountID(srcAccountID).equals(this.name)) {
+			// make sure source account exists locally
+			checkOrCreateAccount(srcAccountID);
+			// make sure destination account exists or belongs to a branch that can be contacted
+			if (!validAccount(dstAccountID)) {
+				answer = "error-to";
+				return answer;
+			}
+			Account accountFrom = accounts.get(srcAccountID);
+			Account accountTo = accounts.get(dstAccountID);
+			if (accountTo == null && validAccount(dstAccountID)) {
+				accountTo = new Account(dstAccountID);
+			}
+			if (amount < 0) {
+				answer = "error-invalid";
+				return answer;
+			}
+			notifySnapshots(accountFrom, accountTo, amount);
+			accountFrom.addBalance(-amount);
+			if (validAccount(dstAccountID, true)) {
+				System.out.println("Local transfer of " + amount + " from " + srcAccountID + " to " + dstAccountID);
+				accountTo.addBalance(amount);
+			} else {
+				System.out.println("Transferring " + amount + " to " + dstAccountID);
+				sendTransfer(accountFrom, accountTo, amount);
+			}
 
-		if (!getBranchFromAccountID(srcAccountID).equals(this.name))
-			return "wrongbranch " + getBranchFromAccountID(srcAccountID) + ", " + this.name;
-
-		// make sure source account exists locally
-		checkOrCreateAccount(srcAccountID);
-
-		// make sure destination account exists or belongs to a branch that can be contacted
-		if (!validAccount(dstAccountID)) {
-			answer = "error-to";
-			return answer;
-		}
-
-		Account accountFrom = accounts.get(srcAccountID);
-		Account accountTo = accounts.get(dstAccountID);
-
-		if (amount < 0) {
-			answer = "error-invalid";
-			return answer;
-		}
-
-		/*
-		if (accountFrom.getBalance() < amount) {
-			answer = "error-insufficient";
-			return answer;
-		}
-		*/
-
-		notifySnapshots(accountFrom, accountTo, amount);
-		accountFrom.addBalance(-amount);
-		if (validAccount(dstAccountID, true)) {
-			System.out.println("Local transfer of " + amount + " from " + srcAccountID + " to " + dstAccountID);
+			answer = "ok";
+		} else if (getBranchFromAccountID(dstAccountID).equals(this.name)) {
+			// make sure source account exists locally
+			checkOrCreateAccount(dstAccountID);
+			Account accountFrom = accounts.get(srcAccountID);
+			Account accountTo = accounts.get(dstAccountID);
+			if (accountFrom == null) {
+				accountFrom = new Account(srcAccountID);
+			}
+			if (amount < 0) {
+				answer = "error-invalid";
+				return answer;
+			}
+			notifySnapshots(accountFrom, accountTo, amount);
 			accountTo.addBalance(amount);
+			answer = "ok";
 		} else {
-			System.out.println("Transferring " + amount + " to " + dstAccountID);
-			sendTransfer(dstAccountID, amount);
+			return "wrongbranch " + getBranchFromAccountID(srcAccountID) + ", " + this.name;
 		}
-
-		answer = "ok";
-
 		return answer;
 	}
 
-	public void sendTransfer(String accountID, float amount) {
-		String branchID = getBranchFromAccountID(accountID);
-		String message = "";
-		message = "c" + " d " + accountID + " " + amount;
+	public void sendTransfer(Account src, Account dest, float amount) {
+		String branchID = dest.getBranchID();
+		String message = "s" + " t " + src.id + " " + dest.id + " " + amount;
 		messages.send( branchID, message );
 	}
 
@@ -440,6 +448,9 @@ public class Branch_Server {
 
 		System.out.println("");
 		System.out.println("Sending marker message: " + message);
+		try{
+		Thread.sleep(4000);
+		}catch(Exception e){}
 		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
 			String key = branch.getKey();
 			Branch outBranch = branch.getValue();
@@ -478,6 +489,10 @@ class Snapshot {
 	
 	Snapshot (int time, ArrayList<Account> accnts, Branch originBranch, int snapshotNumber) {
 		local_time = time;
+		accounts = new ArrayList<Account>();
+		for (Account a : accnts) {
+			accounts.add(new Account(a));
+		}
 		accounts = accnts;
 		origin = originBranch;
 		number = snapshotNumber;
@@ -497,6 +512,7 @@ class Snapshot {
 	 * Called to notify the snapshot of a transfer
 	 */
 	void addTransfer(Account source, Account destination, float amount) {
+		System.out.println("Adding transfer: " + amount);
 		transfers.add(new Transfer(source, destination, amount));
 	}
 

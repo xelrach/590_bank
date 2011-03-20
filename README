@@ -14,3 +14,5 @@ How to use this system:
 Note that we pre-filled the Branch GUI fields with the ID of the relevant GUI where applicable.  Now it's more clear what you can and can't do.
 
 To get more verbose output, run using "java topology TOPO"
+
+The marker messages are on a 4 second delay, this allows for the user to manually send a transfer to test the transfer functionality.
