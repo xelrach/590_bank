@@ -669,8 +669,7 @@ public class ATMGUI extends javax.swing.JFrame {
             for (i = 3; i < s.length; i++) {
                 String endMessage = "p";
                 if (s[i].equals("p")) {
-                    System.out.println("end of message");
-                    return cont;
+                    break;
                 }
                 cont += s[i];
                 cont += " ";
@@ -679,9 +678,16 @@ public class ATMGUI extends javax.swing.JFrame {
                 cont += "\r\n";
             }
 
+            i++;
+            
             cont += "In-process transfers:\r\n";
             while(i<s.length-1)
             {
+                try {
+                    String z = s[i];
+                } catch(Exception e) {
+                    return cont;
+                }
                 cont+=s[i];
                 cont+="   ";
                 i++;
