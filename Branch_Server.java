@@ -167,7 +167,7 @@ public class Branch_Server {
 		if (!answer.equals("ok")) {
 			System.out.println("");
 			System.out.print("Bad Result: " + answer);
-			return null;
+//			return null;
 		}
 		answer = "s" + " " + answer;
 		return answer;
