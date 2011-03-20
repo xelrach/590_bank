@@ -164,7 +164,11 @@ public class Branch_Server {
 			}
 		}
 
-
+		if (!answer.equals("ok")) {
+			System.out.println("");
+			System.out.print("Bad Result: " + answer);
+			return null;
+		}
 		answer = "s" + " " + answer;
 		return answer;
 	}
@@ -209,7 +213,7 @@ public class Branch_Server {
 			notice += " from " + sourceBranch.getName();
 		}
 		log.info(notice);
-		System.out.println(notice);
+//		System.out.println(notice);
 		snap.addMarker(sourceBranch);
 		if ( snap.isFinished( new HashSet<Branch>(inNeighbors.values()) ) ) {
 			sendGUISnapshot(snap);
@@ -219,12 +223,12 @@ public class Branch_Server {
 
 	public boolean snapExists(Branch originBranch, int snapshotNumber) {
 		String snap_name = Snapshot.getName(originBranch,snapshotNumber);
-		System.out.print(snap_name);
+//		System.out.print(snap_name);
 		if ( snapshots.containsKey(snap_name) ) {
-			System.out.println(" exists");
+//			System.out.println(" exists");
 			return true;
 		}
-		System.out.println(" doesn't exist.");
+//		System.out.println(" doesn't exist.");
 		return false;
 	}
 
@@ -300,7 +304,7 @@ public class Branch_Server {
 	public String deposit(String accountID, float amount) {
 		String answer = "error";
 
-		System.out.println("deposit");
+//		System.out.println("deposit");
 
 		if (!getBranchFromAccountID(accountID).equals(this.name))
 			return "wrongbranch " + getBranchFromAccountID(accountID) + ", " + this.name;
@@ -600,11 +604,10 @@ class ServerThread implements Runnable {
 		// figure out response
 		String input = new String(inbuf);
                 String dString = thisBranch.process_input( input );
-
-		
+		if (dString==null) {
+			continue;
+		}
 		System.out.println("Sending: " + dString);
-		
-
 		    // send the response to the client at "address" and "port"
                 InetAddress address = packet.getAddress();
                 int port = packet.getPort();
