@@ -16,3 +16,5 @@ Note that we pre-filled the Branch GUI fields with the ID of the relevant GUI wh
 To get more verbose output, run using "java topology TOPO"
 
 The marker messages are on a 4 second delay, this allows for the user to manually send a transfer to test the transfer functionality.
+
+The branches can handle multiple snapshots happening at the same time and are fine with deposits, withdrawals, et cetera.
