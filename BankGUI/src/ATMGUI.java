@@ -9,7 +9,7 @@
  * Created on Feb 4, 2011, 11:55:23 AM
  */
 
-//package bank;
+package bank;
 import java.io.*;
 import java.net.*;
 import java.text.*;
@@ -28,9 +28,8 @@ public class ATMGUI extends javax.swing.JFrame {
     public static String GUI_Id="";
     public static String IPadd="";
     public static String port02="";
-    public static int MsgID=1000;
-    public ServerThread serverThread = new ServerThread(this);
-	
+    //public static int MsgID=1000;
+
     public static boolean isAccount(String str)
     {
         Pattern pattern=Pattern.compile("[0-9][0-9]\\.[0-9][0-9][0-9][0-9][0-9]");
@@ -53,10 +52,7 @@ public class ATMGUI extends javax.swing.JFrame {
         }
     }
 
-    public ATMGUI(String IPadd, String port02, String GUI_Id) {
-        this.IPadd = IPadd;
-        this.port02 = port02;
-        this.GUI_Id = GUI_Id;
+    public ATMGUI() {
         initComponents();
         if (!IPadd.equals(""))
             IPTxt.setText(IPadd);
@@ -64,20 +60,7 @@ public class ATMGUI extends javax.swing.JFrame {
             PortText01.setText(GUI_Id);
         if (!port02.equals(""))
             PortText02.setText(port02);
-        start();
     }
-
-	private void killServer() {
-        byte[] msg="c k".getBytes();
-        try{
-            DatagramSocket socket =new DatagramSocket();
-            InetAddress address=InetAddress.getByName(IPTxt.getText());
-            int port =Integer.parseInt(PortText02.getText());
-            DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
-            socket.send(packet);
-            socket.close();
-		} catch (Exception e) {}
-	}
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -118,9 +101,7 @@ public class ATMGUI extends javax.swing.JFrame {
         IPLbl02 = new javax.swing.JLabel();
         PortText02 = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
-        snapping = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        snapans = new javax.swing.JTextArea();
+        btnFail = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(" Bank of COMP590");
@@ -133,15 +114,7 @@ public class ATMGUI extends javax.swing.JFrame {
         AvLbl.setForeground(new java.awt.Color(51, 0, 255));
         AvLbl.setText("Available actions:");
 
-		this.addWindowListener(new java.awt.event.WindowAdapter(){
-			public void windowClosing(java.awt.event.WindowEvent we){
-				killServer();
-				serverThread.serverRunning = false;
-				System.exit(0);
-			}
-		});
         DepositBtn.setText("Deposit");
-        acnt01.setText(GUI_Id+".");
         DepositBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DepositBtnActionPerformed(evt);
@@ -149,7 +122,6 @@ public class ATMGUI extends javax.swing.JFrame {
         });
 
         WithdrawBtn.setText("Withdraw");
-        acnt02.setText(GUI_Id+".");
         WithdrawBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 WithdrawBtnActionPerformed(evt);
@@ -215,7 +187,7 @@ public class ATMGUI extends javax.swing.JFrame {
                     .addComponent(IPTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(IPLbl02)
                     .addComponent(PortText02, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -237,16 +209,12 @@ public class ATMGUI extends javax.swing.JFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        snapping.setText("Snap");
-        snapping.addActionListener(new java.awt.event.ActionListener() {
+        btnFail.setText("FAIL");
+        btnFail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                snappingActionPerformed(evt);
+                btnFailActionPerformed(evt);
             }
         });
-
-        snapans.setColumns(20);
-        snapans.setRows(5);
-        jScrollPane1.setViewportView(snapans);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -254,34 +222,30 @@ public class ATMGUI extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
-                    .addComponent(snapping, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(btnFail, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(snapping)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(btnFail)
+                .addContainerGap(115, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(33, 33, 33)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(AvLbl)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 219, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(WelcomeLbl)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(DepositBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -309,22 +273,17 @@ public class ATMGUI extends javax.swing.JFrame {
                             .addComponent(amtlbl01)
                             .addComponent(amtlbl02)
                             .addComponent(amtlbl04))))
-                .addGap(37, 37, 37)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(29, 29, 29))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(33, 33, 33)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(41, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(WelcomeLbl)
                         .addGap(18, 18, 18)
@@ -351,7 +310,7 @@ public class ATMGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(acnt02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(amount02, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                        .addGap(6, 6, 6)
                         .addComponent(acntlbl03)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -369,8 +328,12 @@ public class ATMGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(acntlbl05)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(acnt05, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(44, 44, 44))))
+                        .addComponent(acnt05, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(31, 31, 31))
         );
 
         pack();
@@ -379,7 +342,7 @@ public class ATMGUI extends javax.swing.JFrame {
     private void DepositBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DepositBtnActionPerformed
         if (!isAccount(acnt01.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!isDouble(amount01.getText()))
@@ -409,7 +372,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -421,7 +384,7 @@ public class ATMGUI extends javax.swing.JFrame {
     private void WithdrawBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WithdrawBtnActionPerformed
         if (!isAccount(acnt02.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (!isDouble(amount02.getText()))
@@ -432,7 +395,7 @@ public class ATMGUI extends javax.swing.JFrame {
 
         String msgtemp="c";
         //MsgID=(int)(Math.random()*10000);
-       // msgtemp+=String.format("%04d", MsgID);
+        //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" w ";
         msgtemp+=acnt02.getText();
         msgtemp+=" ";
@@ -451,7 +414,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -500,7 +463,7 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
@@ -510,9 +473,10 @@ public class ATMGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_TransferBtnActionPerformed
 
     private void QueryBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_QueryBtnActionPerformed
+        // TODO add your handling code here:
         if (!isAccount(acnt03.getText()))
         {
-            JOptionPane.showMessageDialog(null, "Invalid account Number!", "Oops", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid Acount Number!", "Oops", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -521,6 +485,8 @@ public class ATMGUI extends javax.swing.JFrame {
         //msgtemp+=String.format("%04d", MsgID);
         msgtemp+=" q ";
         msgtemp+=acnt03.getText();
+        //msgtemp+=" ";
+        //msgtemp+=amount01.getText();
         byte[] msg=msgtemp.getBytes();
         try{
             DatagramSocket socket =new DatagramSocket();
@@ -529,38 +495,37 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            byte[] buf = new byte[64];
-            packet=new DatagramPacket(buf, buf.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
             String[] respns=received.split(" ");
-            if (respns.length!=4) {
+            if (respns.length!=4)
                 JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
-            }else {
-                if ((respns[0].equals("s"/*+String.format("%04d", MsgID)*/)) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
+            else
+            {
+                if ((respns[0].equals("s")) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
                    JOptionPane.showMessageDialog(null, "Your account has a balance of "+respns[3],
                            "Result",JOptionPane.INFORMATION_MESSAGE);
                 else
                     JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
             }
             socket.close();
-            //JOptionPane.showMessageDialog(null, received,"Delivered",JOptionPane.INFORMATION_MESSAGE);
+            //JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
             JOptionPane.showMessageDialog(null, "Can't connect to server!","Oops",JOptionPane.ERROR_MESSAGE);
-        } catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "Balance was not returned","Oops",JOptionPane.ERROR_MESSAGE);
         }
-        // TODO add your handling code here:
     }//GEN-LAST:event_QueryBtnActionPerformed
 
-    private void snappingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_snappingActionPerformed
+    private void btnFailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFailActionPerformed
         // TODO add your handling code here:
+
         String msgtemp="c";
-        msgtemp+=" s ";
+        msgtemp+=" f ";
+
         byte[] msg=msgtemp.getBytes();
         try{
             DatagramSocket socket =new DatagramSocket();
@@ -569,23 +534,46 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            packet=new DatagramPacket(msg, msg.length);
-            socket.receive(packet);
+            //packet=new DatagramPacket(msg, msg.length);
+            //socket.receive(packet);
 
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            //String s="s 01.01 4 b 03.2222 12.20 p 01.2222 02.2222 1.22";
-            snapans.setText(ProcessSnap(received));
-
-            JOptionPane.showMessageDialog(null, received,"Snap sent to branch",JOptionPane.INFORMATION_MESSAGE);
-
+            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException e)
         {
             JOptionPane.showMessageDialog(null, "Can't connect to server!","Oops",JOptionPane.ERROR_MESSAGE);
         }
-    }//GEN-LAST:event_snappingActionPerformed
+    }//GEN-LAST:event_btnFailActionPerformed
+
+    /**
+    * @param args the command line arguments
+    */
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new ATMGUI().setVisible(true);
+            }
+        });
+        if (args.length==1)
+            IPadd=args[0];
+        else if(args.length == 2)
+        {
+            IPadd=args[0];
+            port02=args[1];
+        }
+        else if (args.length ==3)
+        {
+            IPadd=args[0];
+            port02=args[1];
+            GUI_Id=args[2];
+        }
+        else
+        {
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AvLbl;
@@ -616,171 +604,9 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JLabel amtlbl01;
     private javax.swing.JLabel amtlbl02;
     private javax.swing.JLabel amtlbl04;
+    private javax.swing.JButton btnFail;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea snapans;
-    private javax.swing.JButton snapping;
     // End of variables declaration//GEN-END:variables
-
-    public String ProcessSnap(String packet){
-        String[] s=packet.split(" ");
-        String cont="";
-        
-        /*
-        // Just some debugging code
-        
-        System.out.println("WE GONNA PRINT DA SNAP NOW");
-        for (int i = 0; i < s.length; i++ ){
-            if (s[i].equals("p")) return cont;
-            
-            if (s[i].equals("b")) {
-                cont += "Account List:\r\n";
-            }
-            
-            if (i == 2) {
-                cont += "Timestamp: " + s[i];
-            } else {
-                cont += s[i];
-                cont += "\r\n";
-            }
-        }
-        if (2 > 1) {
-            System.out.println(cont);
-            System.out.println("DONE PRINTING SNAP");
-        }
-        */
-        try{
-            for (int i = 0; i < s.length; i++) {
-                s[i] = s[i].trim();
-            }
-            if ((s[0].equals("s"))&&(s.length<5)){
-                cont+="Snapshot started... waiting for markers";
-                cont+="\r\n";
-                return cont;
-            }
-            cont = "Snap ID: "+s[0];
-            cont += "\r\n";
-            cont += "Ans [timestamp]: "+s[1];
-            cont += "\r\n";
-            
-            cont+="Account List:\r\n";
-            int i = 3;
-            for (i = 3; i < s.length; i++) {
-                String endMessage = "p";
-                if (s[i].equals("p")) {
-                    break;
-                }
-                cont += s[i];
-                cont += " ";
-                i++;
-                cont += s[i];
-                cont += "\r\n";
-            }
-
-            i++;
-            
-            cont += "In-process transfers:\r\n";
-            while(i<s.length-1)
-            {
-                try {
-                    String z = s[i];
-                } catch(Exception e) {
-                    return cont;
-                }
-                cont+=s[i];
-                cont+="   ";
-                i++;
-                cont+=s[i];
-                cont+="   ";
-                i++;
-                cont+=s[i];
-                cont+="\r\n";
-                i++;
-            }
-        }
-        catch(Exception e){
-            cont="Error in ProcessSnap";
-            System.out.println("Error in ProcessSnap:  " + e);
-        }
-       return cont;
-    }
-
-	public void start() {
-		if (serverThread != null) {
-			Thread thread = new Thread(serverThread);
-			thread.start();
-		}
-		System.out.println("Done starting GUI thread");
-	}
-	
-    class ServerThread implements Runnable {
-        protected DatagramSocket socket = null;
-        protected BufferedReader in = null;
-        protected boolean serverRunning = true;
-        private ATMGUI thisGUI;
-        public int port;
-        InetAddress GUIAddress;
-        int GUIPort;
-
-        public ServerThread(ATMGUI thisGUI) {
-            this.thisGUI = thisGUI;
-        }
-
-        /*
-        public ServerThread(ATMGUI thisGUI, int port) { 
-        	this.port = port;
-        	this.thisGUI = thisGUI;
-        }
-        */
-       
-        public void run() {
-            Integer theGUIport = Integer.parseInt(port02.trim());
-            theGUIport += 1000;
-    	    this.port = theGUIport;
-
-			System.out.println("GUI Listening on " + port);
-        	try {
-  //      		socket = new DatagramSocket(Integer.parseInt(port02.trim()));
-			    socket = new DatagramSocket(port);
-        	} catch(Exception e) {
-		        System.err.println(e);
-                System.out.println("socket error!");
-        	}
-
-            while (serverRunning) {
-                try {
-                    byte[] inbuf = new byte[256];
-                    
-                    DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
-                    socket.receive(packet);
-		            System.out.print("GUI got message: ");
-                    
-                    String input = new String(inbuf);
-                    snapans.setText(ProcessSnap(input));
-                    System.out.println(input);
-                    
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println(e);
-                    System.out.println("Error stopped GUI server (IOException)");
-    		        serverRunning = false;
-                } catch (Exception e) {
-                    serverRunning = false;
-                    System.out.println("Error stopped GUI server");
-                }
-
-        		try {
-        			Thread.sleep(100);
-        		} catch (Exception e) {
-        		    System.out.println(e);
-        		}
-            }
-            
-    	    System.out.println("Closing socket.");
-            socket.close();
-        }
-
-    }
 
 }
