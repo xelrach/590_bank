@@ -8,6 +8,11 @@ public class Account {
 		System.out.println("Created account with id " + this.id);
 	}
 
+	public Account(String id, float balance) {
+		this.id = id;
+		this.balance = balance;
+	}
+
 	public Account(Account other) {
 		id = other.id;
 		balance = other.getBalance();
