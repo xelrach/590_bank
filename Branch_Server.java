@@ -183,6 +183,8 @@ public class Branch_Server {
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
 			} else if (command.equals("b")) {
 				answer = backup_acknowledge( tokens[2] );
+			} else if (command.equals("s")) {
+				answer = sendState(Integer.parseInt(tokens[2]));
 			}
 		}
 
@@ -282,6 +284,29 @@ public class Branch_Server {
 
 	public void wakeup(){
 		//wakeup code here:
+	}
+
+	public String sendState(int time) {
+		//Store the state of the branch
+		Iterator it = accounts.values().iterator();
+		ArrayList<Account> values = new ArrayList<Account>();
+		while (it.hasNext()) {
+			values.add( new Account( (Account)it.next()) );
+		}
+		Snapshot snap = new Snapshot(local_time, values, new Branch(name), -1);
+		return snap.getMessage();
+	}
+
+	Socket queryMaster() {
+		try{
+			return new Socket("localhost", 1234);
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
+	public void requestState() {
+		Socket sock = queryMaster();
 	}
 
 	/** 
@@ -567,108 +592,6 @@ public class Branch_Server {
 		}
 	}
 
-}
-
-class Snapshot {
-	class Transfer {
-		Account source;
-		Account destination;
-		float amount;
-
-		public Transfer(Account src, Account dest, float moneys) {
-			source = src;
-			destination = dest;
-			amount = moneys;
-		}
-
-		public Transfer(Transfer t) {
-			source = t.source;
-			destination = t.destination;
-			amount = t.amount;
-		}
-	}
-
-	int local_time;
-	ArrayList<Account> accounts;
-	ArrayList<Transfer> transfers = new ArrayList<Transfer>();
-	HashSet<Branch> markers = new HashSet<Branch>();
-	public Branch origin;
-	public int number;
-	
-	Snapshot (int time, ArrayList<Account> accnts, Branch originBranch, int snapshotNumber) {
-		local_time = time;
-		accounts = new ArrayList<Account>();
-		for (Account a : accnts) {
-			accounts.add(new Account(a));
-		}
-		accounts = accnts;
-		origin = originBranch;
-		number = snapshotNumber;
-	}
-
-	/**
-	 * Called when a marker message is received
-	 */
-	void addMarker(Branch sourceBranch) {
-		if (sourceBranch != null) {
-			markers.add(sourceBranch);
-		}
-	}
-
-
-	/**
-	 * Called to notify the snapshot of a transfer
-	 */
-	void addTransfer(Account source, Account destination, float amount) {
-		System.out.println("Adding transfer: " + amount);
-		transfers.add(new Transfer(source, destination, amount));
-	}
-
-	public boolean equals(Object o) {
-		if (o instanceof Snapshot) {
-			Snapshot other = (Snapshot)o;
-			if (other.origin.equals(origin) && other.number==number) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	String getMessage() {
-		String result = origin.name + "." + number + " " + local_time + " b";
-		for (Account account : accounts) {
-			result += " " + account.id + " " + account.getBalance();
-		}
-		result += " p";
-		for (Transfer t : transfers) {
-			result += " " + t.source.id + " " + t.destination.id + " " + t.amount;
-		}
-		System.out.println(result);
-		return result;
-	}
-
-	public String getName() {
-		return getName(origin, number);
-	}
-	
-	public static String getName(Branch branch, int number) {
-		return branch.name + "." + number;
-	}
-
-	public int hashCode() {
-		return getName().hashCode();
-	}
-
-	/**
-	 * Returns true if all of the marker messages have been received
-	 */
-	public boolean isFinished(Set<Branch> inEdges) {
-		inEdges.removeAll(markers);
-		if (inEdges.isEmpty()) {
-			return true;
-		}
-		return false;
-	}
 }
 
 class ServerThread implements Runnable {
