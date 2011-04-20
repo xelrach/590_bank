@@ -179,33 +179,33 @@ public class Branch_Server {
 		return answer;
 	}
 
-        public String fakecrash(){
-            String answer = "error";
-            int sleepsecond = 15;
-            sleepsecond += (int)(Math.random() * 106);
-            long sleeptime = sleepsecond * 1000;
-            try{
-               System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
-               this.name = "some branch";
-               local_time = 0;
-               this.port = 4444;
-	       serverThread = new ServerThread();
-               branch = new Branch();
-      
-               Thread.sleep(sleeptime);
-            }
-            catch(InterruptedException e){
-                answer = "Fake crash fails.";
-                return answer;
-            }
-            wakeup();
-            answer = "OK";
-            return answer;
-        }
-        
-        public void wakeup(){
-            //wakeup code here:
-        }
+	public String fakecrash(){
+		String answer = "error";
+		int sleepsecond = 15;
+		sleepsecond += (int)(Math.random() * 106);
+		long sleeptime = sleepsecond * 1000;
+		try{
+			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
+//			this.name = "some branch";
+			local_time = 0;
+//			this.port = 4444;
+			branch = new Branch();
+			serverThread = new ServerThread(this, this.name, this.port);
+
+			Thread.sleep(sleeptime);
+		}
+		catch(InterruptedException e){
+			answer = "Fake crash fails.";
+			return answer;
+		}
+		wakeup();
+		answer = "OK";
+		return answer;
+	}
+
+	public void wakeup(){
+		//wakeup code here:
+	}
 
 	/** 
 	 * Start a snapshot

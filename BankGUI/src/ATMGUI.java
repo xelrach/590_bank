@@ -9,7 +9,6 @@
  * Created on Feb 4, 2011, 11:55:23 AM
  */
 
-package bank;
 import java.io.*;
 import java.net.*;
 import java.text.*;
