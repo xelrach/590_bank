@@ -143,7 +143,10 @@ public class Branch_Server {
 			if (command.equals("w")) {
 				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
-			} else if (command.equals("d")) {
+			} else if (command.equals("f")){
+                                ++local_time;
+                                answer=fakecrash();
+                        }else if (command.equals("d")) {
 				++local_time;
 				answer = deposit(accountID, Float.parseFloat(arg4));
 			} else if (command.equals("t")) {
@@ -175,6 +178,34 @@ public class Branch_Server {
 		answer = "s" + " " + answer;
 		return answer;
 	}
+
+        public String fakecrash(){
+            String answer = "error";
+            int sleepsecond = 15;
+            sleepsecond += (int)(Math.random() * 106);
+            long sleeptime = sleepsecond * 1000;
+            try{
+               System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
+               this.name = "some branch";
+               local_time = 0;
+               this.port = 4444;
+	       serverThread = new ServerThread();
+               branch = new Branch();
+      
+               Thread.sleep(sleeptime);
+            }
+            catch(InterruptedException e){
+                answer = "Fake crash fails.";
+                return answer;
+            }
+            wakeup();
+            answer = "OK";
+            return answer;
+        }
+        
+        public void wakeup(){
+            //wakeup code here:
+        }
 
 	/** 
 	 * Start a snapshot
