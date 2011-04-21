@@ -305,12 +305,9 @@ public class Branch_Server {
 		long sleeptime = sleepsecond * 1000;
 		try{
 			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
-//			this.name = "some branch";
 			local_time = 0;
-//			this.port = 4444;
-			branch = new Branch();
-			serverThread = new ServerThread(this, this.name, this.port);
 			doHeartbeat = false;
+			accounts.clear();
 			Thread.sleep(sleeptime);
 		}
 		catch(InterruptedException e){
