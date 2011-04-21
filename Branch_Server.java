@@ -14,17 +14,15 @@ public class Branch_Server {
 	    	while (true) {
 	    		if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
-				    	while (branch.alive_marker == true) {
-							// send heartbeat to all peers
-							Map.Entry pairs;
-							Iterator it = cluster_peers.entrySet().iterator();
-							Branch branch;
-							while (it.hasNext()) {
-								pairs = (Map.Entry)it.next();
-								branch = (Branch)pairs.getValue();
-								transmit_alive( branch );
-							}
-				    	}
+						// send heartbeat to all peers
+						Map.Entry pairs;
+						Iterator it = cluster_peers.entrySet().iterator();
+						Branch branch;
+						while (it.hasNext()) {
+							pairs = (Map.Entry)it.next();
+							branch = (Branch)pairs.getValue();
+							transmit_alive( branch );
+						}
 				    } else { // check for heartbeat from who this branch thinks is the master
 				    	if (master_is_alive == false) { // OMG no heartbeat
 				    		restore_cluster();
@@ -224,8 +222,7 @@ public class Branch_Server {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
 			} else if (command.equals("b")) {
-				master_is_alive = true; // this branch server has received a heartbeat
-				answer = backup_acknowledge( tokens[2] );
+				answer = peer_acknowledge( tokens[2] );
 			}
 		}
 
@@ -238,11 +235,13 @@ public class Branch_Server {
 		return answer;
 	}
 
-	public String backup_acknowledge( String ack_id ) {
+	public String peer_acknowledge( String ack_id ) {
 		String answer = "ok";
 
 		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
-
+		if (branch_ack.is_master) {
+			master_is_alive = true; // this branch server has received a heartbeat
+		}
 		branch_ack.alive_marker = true;
 		
 		return answer;
