@@ -539,7 +539,14 @@ public class ATMGUI extends javax.swing.JFrame {
             String received =new String(packet.getData(),0,packet.getLength());
 
             socket.close();
-            JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+            //JOptionPane.showMessageDialog(null, received,"Deliverd",JOptionPane.INFORMATION_MESSAGE);
+
+            try{
+                Thread.sleep(4000);
+            }
+            catch(Exception e){
+            }
+            //sleep some time for the "unstable" period
         }
         catch(IOException e)
         {
