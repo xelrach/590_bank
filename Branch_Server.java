@@ -202,7 +202,6 @@ public class Branch_Server {
                                     UpdateToBackups(UpdateMsg);
                                 }
 			} else if (command.equals("f")){
-                                ++local_time;
                                 answer=fakecrash();
                         }else if (command.equals("d")) {
 				++local_time;
@@ -253,14 +252,18 @@ public class Branch_Server {
                                     UpdateToBackups(UpdateMsg);
                                 }
 				answer = backup_acknowledge( tokens[2] );
+			} else if (command.equals("s")) {
+				answer = sendState(Integer.parseInt(tokens[2]));
+			} else if (command.equals("qm")) {
+				answer = queryMasterRespond();
 			}
 		}
-
+/*
 		if (!answer.equals("ok")) {
 			System.out.println("");
 			System.out.print("Bad Result: " + answer);
 //			return null;
-		}
+		}*/
 		answer = "s" + " " + answer;
 		return answer;
 	}
@@ -339,8 +342,9 @@ public class Branch_Server {
 	public void transmit_alive (Branch process) {
 		if (process == null)
 			return;
-
+		try{
 		messages.send( this.branch, process, "b " + this.processID );
+		}catch(Exception e) {}
 	}
 
 	public String fakecrash(){
@@ -365,8 +369,51 @@ public class Branch_Server {
 	}
 
 	public void wakeup(){
-		//wakeup code here:
 		doHeartbeat = true;
+		Iterator it = cluster_peers.values().iterator();
+		Branch otherBranch = (Branch)it.next();
+		master_branch = queryMaster(otherBranch);
+		Snapshot snap = Snapshot.parseSnap(requestState(otherBranch));
+		for (Account a:snap.getAccounts()) {
+			accounts.put(a.id,a);
+		}
+		local_time = snap.local_time;
+	}
+
+	public String sendState(int time) {
+		//Store the state of the branch
+		Iterator it = accounts.values().iterator();
+		ArrayList<Account> values = new ArrayList<Account>();
+		while (it.hasNext()) {
+			values.add( new Account( (Account)it.next()) );
+		}
+		Snapshot snap = new Snapshot(local_time, values, new Branch(name), -1);
+		return snap.getMessage();
+	}
+
+	Branch queryMaster(Branch otherBranch) {
+/*		try{
+			return new Socket("localhost", 1234);
+		} catch (Exception e) {
+		}
+		return null;*/
+		String sMaster = "";
+		try{
+		sMaster = messages.send(branch, otherBranch, "qm");
+		}catch (Exception e){}
+		return cluster_peers.get(Integer.parseInt(sMaster));
+	}
+
+	String queryMasterRespond() {
+		return "qmr" + Integer.toString(master_branch.processID);
+	}
+
+	public String requestState(Branch otherBranch) {
+		String state = "";
+		try {
+			state = messages.send(branch, otherBranch, "s");
+		} catch (Exception e) {}
+		return state;
 	}
 
 	/** 
@@ -602,7 +649,9 @@ public class Branch_Server {
                                 if (branch.is_master == false) return;
 		String branchID = dest.getBranchID();
 		String message = "s" + " t " + src.id + " " + dest.id + " " + amount;
+		try{
 		messages.send( branchID, message );
+		} catch (Exception e) {}
 	}
 
 
@@ -648,113 +697,12 @@ public class Branch_Server {
 		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
 			String key = branch.getKey();
 			Branch outBranch = branch.getValue();
-
+			try{
 			messages.send( outBranch.name, message );
+			}catch (Exception e) {}
 		}
 	}
 
-}
-
-class Snapshot {
-	class Transfer {
-		Account source;
-		Account destination;
-		float amount;
-
-		public Transfer(Account src, Account dest, float moneys) {
-			source = src;
-			destination = dest;
-			amount = moneys;
-		}
-
-		public Transfer(Transfer t) {
-			source = t.source;
-			destination = t.destination;
-			amount = t.amount;
-		}
-	}
-
-	int local_time;
-	ArrayList<Account> accounts;
-	ArrayList<Transfer> transfers = new ArrayList<Transfer>();
-	HashSet<Branch> markers = new HashSet<Branch>();
-	public Branch origin;
-	public int number;
-	
-	Snapshot (int time, ArrayList<Account> accnts, Branch originBranch, int snapshotNumber) {
-		local_time = time;
-		accounts = new ArrayList<Account>();
-		for (Account a : accnts) {
-			accounts.add(new Account(a));
-		}
-		accounts = accnts;
-		origin = originBranch;
-		number = snapshotNumber;
-	}
-
-	/**
-	 * Called when a marker message is received
-	 */
-	void addMarker(Branch sourceBranch) {
-		if (sourceBranch != null) {
-			markers.add(sourceBranch);
-		}
-	}
-
-
-	/**
-	 * Called to notify the snapshot of a transfer
-	 */
-	void addTransfer(Account source, Account destination, float amount) {
-		System.out.println("Adding transfer: " + amount);
-		transfers.add(new Transfer(source, destination, amount));
-	}
-
-	public boolean equals(Object o) {
-		if (o instanceof Snapshot) {
-			Snapshot other = (Snapshot)o;
-			if (other.origin.equals(origin) && other.number==number) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	String getMessage() {
-		String result = origin.name + "." + number + " " + local_time + " b";
-		for (Account account : accounts) {
-			result += " " + account.id + " " + account.getBalance();
-		}
-		result += " p";
-		for (Transfer t : transfers) {
-			result += " " + t.source.id + " " + t.destination.id + " " + t.amount;
-		}
-		System.out.println(result);
-		return result;
-	}
-
-	public String getName() {
-		return getName(origin, number);
-	}
-	
-	public static String getName(Branch branch, int number) {
-		return branch.name + "." + number;
-	}
-
-	public int hashCode() {
-		return getName().hashCode();
-	}
-
-	/**
-	 * Returns true if all of the marker messages have been received
-	 */
-	public boolean isFinished(Set<Branch> inEdges) {
-		inEdges.removeAll(markers);
-		if (inEdges.isEmpty()) {
-			return true;
-		}
-		return false;
-	}
 }
 
 class ServerThread implements Runnable {
@@ -806,7 +754,7 @@ class ServerThread implements Runnable {
 
         		// figure out response
         		String input = new String(inbuf);
-                String dString = thisBranch.process_input( input );
+                String dString = thisBranch.process_input(input);
 
         		if (dString==null) {
         			continue;
@@ -838,6 +786,7 @@ class ServerThread implements Runnable {
 
 }
 
+class NoPathException extends Exception {}
 
 class NetworkWrapper {
 	public HashMap<String, Branch> topology = new HashMap<String, Branch>();
@@ -846,9 +795,14 @@ class NetworkWrapper {
 		this.topology = topology;
 	}
 
-	public boolean send(String address, int port, String message) {
+	public String send(String address, int port, String message) throws NoPathException {
+		DatagramSocket clientSocket;
 		try {
-			DatagramSocket clientSocket = new DatagramSocket();
+			clientSocket = new DatagramSocket();
+		} catch (Exception e) {
+			throw new NoPathException();
+		}
+		try {
 			InetAddress IPAddress = InetAddress.getByName("localhost");
 			byte[] sendData = message.getBytes();
 
@@ -856,29 +810,32 @@ class NetworkWrapper {
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
+			byte[] buff = new byte[100];
+			DatagramPacket response = new DatagramPacket(buff, 100);
+			clientSocket.receive(response);
 			clientSocket.close();
+			return new String(response.getData());
 		} catch( Exception e ) {
-			return false;
+			clientSocket.close();
+			throw new NoPathException();
 		}
-
-		return true;
 	}
 
-	public boolean send( Branch fromProcess, Branch toProcess, String message) {
+	public String send( Branch fromProcess, Branch toProcess, String message) throws NoPathException {
 		if (fromProcess.name != toProcess.name)
 			return send(toProcess.name, message);
 
 		return send(toProcess.server, toProcess.ServPort, message);
 	}
 
-	public boolean send(String branchID, String message) {
+	public String send(String branchID, String message) throws NoPathException {
 		if (!topology.containsKey(branchID)) {
-			return false;
+			throw new NoPathException();
 		}
 
 		Branch branch = topology.get(branchID);
 		if (branch == null)
-			return false;
+			throw new NoPathException();
 
 		return send("localhost", branch.ServPort, message);
 	}
