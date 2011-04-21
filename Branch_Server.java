@@ -9,6 +9,32 @@ import java.util.logging.SimpleFormatter;
 
 public class Branch_Server {
 
+	class HeartbeatThread extends Thread {
+	    public void run() {
+			if (branch.is_master == true) {
+		    	while (branch.alive_marker == true) {
+					// send heartbeat to all peers
+					Map.Entry pairs;
+					Iterator it = cluster_peers.entrySet().iterator();
+					Branch branch;
+					while (it.hasNext()) {
+						pairs = (Map.Entry)it.next();
+						branch = (Branch)pairs.getValue();
+						transmit_alive( branch );
+					}
+				
+		    		try {
+		    			Thread.sleep(1000);
+		    		} catch (Exception e) {
+		    		}
+		    		
+		    	}
+				
+			} else { // check for heartbeat from who this branch thinks is the master
+		
+	    }
+	}
+	
 	public String name = "some branch";
 	private int local_time = 0;
 	public int port = 4444;
@@ -31,6 +57,10 @@ public class Branch_Server {
 	private NetworkWrapper messages;
 
 	public Branch_Server(String name, int port) {
+		 
+		Thread heartbeat = new HeartbeatThread();
+		heartbeat.start();
+		
 		this.name = name;
 		this.port = port;
 		this.backupID = backupID;
