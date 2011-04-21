@@ -6,26 +6,35 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+
 public class Branch_Server {
 
 	public String name = "some branch";
 	private int local_time = 0;
 	public int port = 4444;
+	public int backupID = 0;
 	public ServerThread serverThread;
 	public Branch branch = new Branch();
 	public int lastSnapshot = 0;
+	public int processID = 0;
 	Logger log;
 	FileHandler fh;
+
+	public Branch master_branch;
 
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
 	public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
+	public HashMap<Integer, Branch> cluster_peers = new HashMap<Integer, Branch>();
+
 	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
 
 	public Branch_Server(String name, int port) {
 		this.name = name;
 		this.port = port;
+		this.backupID = backupID;
+
 		log = Logger.getLogger(Branch_Server.class.getName());
 		fh = null;
 		try{
@@ -41,7 +50,7 @@ public class Branch_Server {
 		branch.name = name;
 		branch.ServPort = port;
 		branch.GUIPort = port + 1000;
-        serverThread =  new ServerThread(this, name, port);
+	        serverThread =  new ServerThread(this, name, port);
 		serverThread.port = port;
 		serverThread.name = name;
 		messages = new NetworkWrapper(outNeighbors);
@@ -54,11 +63,16 @@ public class Branch_Server {
 	}
 
 	InetAddress getGUIAddress() {
-		try{
-		return InetAddress.getByName("localhost");
-		}catch (Exception e) {
+		try {
+			return InetAddress.getByName("localhost");
+		} catch (Exception e) {
 		}
 		return null;
+	}
+
+
+	public void addToCluster(Branch branch) {
+		cluster_peers.put( new Integer(branch.processID), branch);
 	}
 
 	/**
@@ -167,6 +181,8 @@ public class Branch_Server {
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
+			} else if (command.equals("b")) {
+				answer = backup_acknowledge( tokens[2] );
 			}
 		}
 
@@ -177,6 +193,67 @@ public class Branch_Server {
 		}
 		answer = "s" + " " + answer;
 		return answer;
+	}
+
+	public String backup_acknowledge( String ack_id ) {
+		String answer = "ok";
+
+		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
+
+		branch_ack.alive_marker = true;
+
+		return answer;
+	}
+
+	public void restore_cluster() {
+		Map.Entry pairs;
+
+		Iterator it = cluster_peers.entrySet().iterator();
+		Branch branch;
+		while (it.hasNext()) {
+			pairs = (Map.Entry)it.next();
+			branch = (Branch)pairs.getValue();
+			branch.alive_marker = false;
+
+			transmit_alive( branch );
+		}
+
+		try {
+		Thread.sleep(10000);
+		} catch (Exception e) {
+		}
+
+		determine_master();
+	}
+
+	public void determine_master() {
+
+		Map.Entry pairs;
+		Branch newMaster = this.branch;
+		
+		Iterator it = cluster_peers.entrySet().iterator();
+		Branch branch;
+		while (it.hasNext()) {
+
+			pairs = (Map.Entry)it.next();
+			branch = (Branch) pairs.getValue();
+
+			branch.is_master = false;
+
+			if (newMaster == null || branch.processID < newMaster.processID) {
+				newMaster = branch;
+			}
+		}
+
+		newMaster.is_master = true;
+
+	}
+
+	public void transmit_alive (Branch process) {
+		if (process == null)
+			return;
+
+		messages.send( this.branch, process, "b " + this.processID );
 	}
 
 	public String fakecrash(){
@@ -683,6 +760,31 @@ class NetworkWrapper {
 		this.topology = topology;
 	}
 
+	public boolean send(String address, int port, String message) {
+		try {
+			DatagramSocket clientSocket = new DatagramSocket();
+			InetAddress IPAddress = InetAddress.getByName("localhost");
+			byte[] sendData = message.getBytes();
+
+			System.out.println("Sending (to branch): " + message);
+
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+			clientSocket.send(sendPacket);
+			clientSocket.close();
+		} catch( Exception e ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public boolean send( Branch fromProcess, Branch toProcess, String message) {
+		if (fromProcess.name != toProcess.name)
+			return send(toProcess.name, message);
+
+		return send(toProcess.server, toProcess.ServPort, message);
+	}
+
 	public boolean send(String branchID, String message) {
 		if (!topology.containsKey(branchID)) {
 			return false;
@@ -691,20 +793,8 @@ class NetworkWrapper {
 		Branch branch = topology.get(branchID);
 		if (branch == null)
 			return false;
-		try {
-			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("localhost");
-			byte[] sendData = message.getBytes();
 
-			System.out.println("Sending (to branch): " + message);
-
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, branch.ServPort);
-			clientSocket.send(sendPacket);
-			clientSocket.close();
-		} catch( Exception e ) {
-			return false;
-		}
-		return true;
+		return send("localhost", branch.ServPort, message);
 	}
 
 	public String whoNeighbors() {
