@@ -197,32 +197,62 @@ public class Branch_Server {
 			if (command.equals("w")) {
 				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
 			} else if (command.equals("f")){
                                 ++local_time;
                                 answer=fakecrash();
                         }else if (command.equals("d")) {
 				++local_time;
 				answer = deposit(accountID, Float.parseFloat(arg4));
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
+                                //transfer function needs changing.
 			} else if (command.equals("s")) {
 				answer = startSnapshot();
 			} else if (command.equals("q")) {
 				++local_time;
 				answer = query(accountID);
 			} else if (command.equals("k")) {
+                            if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
 			    this.serverThread.serverRunning = false;
 				System.exit(0);
 			}
 		} else if (messageType == 's') {
 			if (command.equals("m")) {
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
 				answer = markerMessage( tokens[2], tokens[3], tokens[4] );
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
+                                //transfer function needs changing.
 			} else if (command.equals("b")) {
-				answer = peer_acknowledge( tokens[2] );
+                                if (branch.is_master == true){
+                                    UpdateMsg = input;
+                                    UpdateToBackups(UpdateMsg);
+                                }
+				answer = backup_acknowledge( tokens[2] );
 			}
 		}
 
@@ -234,6 +264,21 @@ public class Branch_Server {
 		answer = "s" + " " + answer;
 		return answer;
 	}
+
+        public void UpdateToBackups( String msg){
+            Map.Entry pairs;
+            Iterator it = cluster_peers.entrySet().iterator();
+            Branch ibranch;
+            while (it.hasNext()) {
+                pairs = (Map.Entry)it.next();
+                ibranch = (Branch) pairs.getValue();
+
+                if (ibranch.is_master)
+                    continue;
+                String branchID = ibranch.getBranchID();
+                messages.send(branchID,msg);
+            }
+        }
 
 	public String peer_acknowledge( String ack_id ) {
 		String answer = "ok";
@@ -554,6 +599,7 @@ public class Branch_Server {
 	}
 
 	public void sendTransfer(Account src, Account dest, float amount) {
+                                if (branch.is_master == false) return;
 		String branchID = dest.getBranchID();
 		String message = "s" + " t " + src.id + " " + dest.id + " " + amount;
 		messages.send( branchID, message );
