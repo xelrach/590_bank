@@ -12,30 +12,40 @@ public class Branch_Server {
 	class HeartbeatThread extends Thread {
 	    public void run() {
 	    	while (true) {
-				if (branch.is_master == true) { // if this branch thinks it's the master
-			    	while (branch.alive_marker == true) {
-						// send heartbeat to all peers
-						Map.Entry pairs;
-						Iterator it = cluster_peers.entrySet().iterator();
-						Branch branch;
-						while (it.hasNext()) {
-							pairs = (Map.Entry)it.next();
-							branch = (Branch)pairs.getValue();
-							transmit_alive( branch );
-						}
-			    	}
-			    } else { // check for heartbeat from who this branch thinks is the master
-			    	
-			    }
-						
-	    		try {
-	    			Thread.sleep(1000);
-	    		} catch (Exception e) {
-	    		}
+	    		if (doHeartbeat == true) {
+					if (branch.is_master == true) { // if this branch thinks it's the master
+				    	while (branch.alive_marker == true) {
+							// send heartbeat to all peers
+							Map.Entry pairs;
+							Iterator it = cluster_peers.entrySet().iterator();
+							Branch branch;
+							while (it.hasNext()) {
+								pairs = (Map.Entry)it.next();
+								branch = (Branch)pairs.getValue();
+								transmit_alive( branch );
+							}
+				    	}
+				    } else { // check for heartbeat from who this branch thinks is the master
+				    	if (master_is_alive == false) { // OMG no heartbeat
+				    		restore_cluster();
+				    		continue;
+				    	}
+				    	/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
+				    	master_is_alive = false; // don't worry; this gets set true in process_input every second (if a heartbeat was received)
+				    }
+					
+					// now wait a second to allow sending (or receipt) or heartbeat
+		    		try {
+		    			Thread.sleep(1000);
+		    		} catch (Exception e) {
+		    		}
+		    	}
 	    	}
 	    }
 	}
 	
+	public boolean master_is_alive = false;
+	public boolean doHeartbeat = true;
 	public String name = "some branch";
 	private int local_time = 0;
 	public int port = 4444;
@@ -214,6 +224,7 @@ public class Branch_Server {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
 			} else if (command.equals("b")) {
+				master_is_alive = true; // this branch server has received a heartbeat
 				answer = backup_acknowledge( tokens[2] );
 			}
 		}
@@ -233,7 +244,7 @@ public class Branch_Server {
 		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
 
 		branch_ack.alive_marker = true;
-
+		
 		return answer;
 	}
 
@@ -300,7 +311,7 @@ public class Branch_Server {
 //			this.port = 4444;
 			branch = new Branch();
 			serverThread = new ServerThread(this, this.name, this.port);
-
+			doHeartbeat = false;
 			Thread.sleep(sleeptime);
 		}
 		catch(InterruptedException e){
@@ -314,6 +325,7 @@ public class Branch_Server {
 
 	public void wakeup(){
 		//wakeup code here:
+		doHeartbeat = true;
 	}
 
 	/** 
