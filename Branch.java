@@ -4,9 +4,11 @@ import java.util.*;
 
 public class Branch {
 	public String name;
-	String server;
+	String server = "localhost";
 	int ServPort = 12345;
 	int GUIPort = 12345;
+
+	int processID = 0;
 
 	public boolean is_master = false;
 	public boolean alive_marker = true;
