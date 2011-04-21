@@ -158,7 +158,6 @@ public class Branch_Server {
 				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
 			} else if (command.equals("f")){
-                                ++local_time;
                                 answer=fakecrash();
                         }else if (command.equals("d")) {
 				++local_time;
@@ -185,14 +184,16 @@ public class Branch_Server {
 				answer = backup_acknowledge( tokens[2] );
 			} else if (command.equals("s")) {
 				answer = sendState(Integer.parseInt(tokens[2]));
+			} else if (command.equals("qm")) {
+				answer = queryMasterRespond();
 			}
 		}
-
+/*
 		if (!answer.equals("ok")) {
 			System.out.println("");
 			System.out.print("Bad Result: " + answer);
 //			return null;
-		}
+		}*/
 		answer = "s" + " " + answer;
 		return answer;
 	}
@@ -254,8 +255,9 @@ public class Branch_Server {
 	public void transmit_alive (Branch process) {
 		if (process == null)
 			return;
-
+		try{
 		messages.send( this.branch, process, "b " + this.processID );
+		}catch(Exception e) {}
 	}
 
 	public String fakecrash(){
@@ -283,7 +285,14 @@ public class Branch_Server {
 	}
 
 	public void wakeup(){
-		//wakeup code here:
+		Iterator it = cluster_peers.values().iterator();
+		Branch otherBranch = (Branch)it.next();
+		master_branch = queryMaster(otherBranch);
+		Snapshot snap = Snapshot.parseSnap(requestState(otherBranch));
+		for (Account a:snap.getAccounts()) {
+			accounts.put(a.id,a);
+		}
+		local_time = snap.local_time;
 	}
 
 	public String sendState(int time) {
@@ -297,16 +306,29 @@ public class Branch_Server {
 		return snap.getMessage();
 	}
 
-	Socket queryMaster() {
-		try{
+	Branch queryMaster(Branch otherBranch) {
+/*		try{
 			return new Socket("localhost", 1234);
 		} catch (Exception e) {
 		}
-		return null;
+		return null;*/
+		String sMaster = "";
+		try{
+		sMaster = messages.send(branch, otherBranch, "qm");
+		}catch (Exception e){}
+		return cluster_peers.get(Integer.parseInt(sMaster));
 	}
 
-	public void requestState() {
-		Socket sock = queryMaster();
+	String queryMasterRespond() {
+		return "qmr" + Integer.toString(master_branch.processID);
+	}
+
+	public String requestState(Branch otherBranch) {
+		String state = "";
+		try {
+			state = messages.send(branch, otherBranch, "s");
+		} catch (Exception e) {}
+		return state;
 	}
 
 	/** 
@@ -541,7 +563,9 @@ public class Branch_Server {
 	public void sendTransfer(Account src, Account dest, float amount) {
 		String branchID = dest.getBranchID();
 		String message = "s" + " t " + src.id + " " + dest.id + " " + amount;
+		try{
 		messages.send( branchID, message );
+		} catch (Exception e) {}
 	}
 
 
@@ -587,8 +611,9 @@ public class Branch_Server {
 		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
 			String key = branch.getKey();
 			Branch outBranch = branch.getValue();
-
+			try{
 			messages.send( outBranch.name, message );
+			}catch (Exception e) {}
 		}
 	}
 
@@ -643,7 +668,7 @@ class ServerThread implements Runnable {
 
         		// figure out response
         		String input = new String(inbuf);
-                String dString = thisBranch.process_input( input );
+                String dString = thisBranch.process_input(input);
 
         		if (dString==null) {
         			continue;
@@ -675,6 +700,7 @@ class ServerThread implements Runnable {
 
 }
 
+class NoPathException extends Exception {}
 
 class NetworkWrapper {
 	public HashMap<String, Branch> topology = new HashMap<String, Branch>();
@@ -683,9 +709,14 @@ class NetworkWrapper {
 		this.topology = topology;
 	}
 
-	public boolean send(String address, int port, String message) {
+	public String send(String address, int port, String message) throws NoPathException {
+		DatagramSocket clientSocket;
 		try {
-			DatagramSocket clientSocket = new DatagramSocket();
+			clientSocket = new DatagramSocket();
+		} catch (Exception e) {
+			throw new NoPathException();
+		}
+		try {
 			InetAddress IPAddress = InetAddress.getByName("localhost");
 			byte[] sendData = message.getBytes();
 
@@ -693,29 +724,32 @@ class NetworkWrapper {
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
+			byte[] buff = new byte[100];
+			DatagramPacket response = new DatagramPacket(buff, 100);
+			clientSocket.receive(response);
 			clientSocket.close();
+			return new String(response.getData());
 		} catch( Exception e ) {
-			return false;
+			clientSocket.close();
+			throw new NoPathException();
 		}
-
-		return true;
 	}
 
-	public boolean send( Branch fromProcess, Branch toProcess, String message) {
+	public String send( Branch fromProcess, Branch toProcess, String message) throws NoPathException {
 		if (fromProcess.name != toProcess.name)
 			return send(toProcess.name, message);
 
 		return send(toProcess.server, toProcess.ServPort, message);
 	}
 
-	public boolean send(String branchID, String message) {
+	public String send(String branchID, String message) throws NoPathException {
 		if (!topology.containsKey(branchID)) {
-			return false;
+			throw new NoPathException();
 		}
 
 		Branch branch = topology.get(branchID);
 		if (branch == null)
-			return false;
+			throw new NoPathException();
 
 		return send("localhost", branch.ServPort, message);
 	}

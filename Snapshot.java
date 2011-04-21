@@ -68,6 +68,10 @@ class Snapshot {
 		return false;
 	}
 
+	ArrayList<Account> getAccounts() {
+		return accounts;
+	}
+
 	String getMessage() {
 		String result = origin.name + "." + number + " " + local_time + " b";
 		for (Account account : accounts) {
