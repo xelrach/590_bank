@@ -11,27 +11,28 @@ public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
 	    public void run() {
-			if (branch.is_master == true) {
-		    	while (branch.alive_marker == true) {
-					// send heartbeat to all peers
-					Map.Entry pairs;
-					Iterator it = cluster_peers.entrySet().iterator();
-					Branch branch;
-					while (it.hasNext()) {
-						pairs = (Map.Entry)it.next();
-						branch = (Branch)pairs.getValue();
-						transmit_alive( branch );
-					}
-				
-		    		try {
-		    			Thread.sleep(1000);
-		    		} catch (Exception e) {
-		    		}
-		    		
-		    	}
-				
-			} else { // check for heartbeat from who this branch thinks is the master
-		
+	    	while (true) {
+				if (branch.is_master == true) { // if this branch thinks it's the master
+			    	while (branch.alive_marker == true) {
+						// send heartbeat to all peers
+						Map.Entry pairs;
+						Iterator it = cluster_peers.entrySet().iterator();
+						Branch branch;
+						while (it.hasNext()) {
+							pairs = (Map.Entry)it.next();
+							branch = (Branch)pairs.getValue();
+							transmit_alive( branch );
+						}
+			    	}
+			    } else { // check for heartbeat from who this branch thinks is the master
+			    	
+			    }
+						
+	    		try {
+	    			Thread.sleep(1000);
+	    		} catch (Exception e) {
+	    		}
+	    	}
 	    }
 	}
 	
@@ -40,6 +41,7 @@ public class Branch_Server {
 	public int port = 4444;
 	public int backupID = 0;
 	public ServerThread serverThread;
+	public Thread heartbeat;
 	public Branch branch = new Branch();
 	public int lastSnapshot = 0;
 	public int processID = 0;
@@ -58,7 +60,7 @@ public class Branch_Server {
 
 	public Branch_Server(String name, int port) {
 		 
-		Thread heartbeat = new HeartbeatThread();
+		heartbeat = new HeartbeatThread();
 		heartbeat.start();
 		
 		this.name = name;
@@ -80,7 +82,7 @@ public class Branch_Server {
 		branch.name = name;
 		branch.ServPort = port;
 		branch.GUIPort = port + 1000;
-	        serverThread =  new ServerThread(this, name, port);
+	    serverThread =  new ServerThread(this, name, port);
 		serverThread.port = port;
 		serverThread.name = name;
 		messages = new NetworkWrapper(outNeighbors);
