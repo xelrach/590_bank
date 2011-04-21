@@ -810,7 +810,7 @@ class NetworkWrapper {
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
-			byte[] buff = new byte[100];
+			byte[] buff = new byte[65536];
 			DatagramPacket response = new DatagramPacket(buff, 100);
 			clientSocket.receive(response);
 			clientSocket.close();
