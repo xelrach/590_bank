@@ -8,6 +8,9 @@ public class Branch {
 	int ServPort = 12345;
 	int GUIPort = 12345;
 
+	public boolean is_master = false;
+	public boolean alive_marker = true;
+
 	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
         public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
         public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
