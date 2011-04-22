@@ -131,10 +131,11 @@ public class topology {
 
 			}
 
-        		/* exec_gui_string = "java GUI_Server_Process 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
-        		System.out.println(exec_gui_string);
-        		final Process p2 = Runtime.getRuntime().exec( exec_gui_string );
-        		*/
+			/*
+		 exec_gui_string = "java GUI_Server_Process 127.0.0.1 " +
+		 thisBranch.ServPort + " " + thisBranch.name;
+		 System.out.println(exec_gui_string); final Process p2 =
+		 Runtime.getRuntime().exec( exec_gui_string );
 			new Thread(new Runnable() {public void run() {
 				try {
 				BufferedReader input = new BufferedReader(new InputStreamReader(p2.getInputStream()));
@@ -155,6 +156,7 @@ public class topology {
 				input.close();
 				} catch (Exception e) {}
 			} } ).start();
+			*/
         	}      
 
 
