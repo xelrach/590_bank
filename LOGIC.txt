@@ -5,7 +5,7 @@
 
 
 ******** Recovery protocol description ********
-
+Recovery is done by state transfer. When a process wakes up from its fake crash, it asks one of the other processes for the current master server. The recovering process asks the master server for its state. The master server queues incoming messages while it gathers its state and sends it to the recovering process. The recovering process then sets all of its accounts to their current values and is then ready to receive messages as a normal backup. 
 
 ******** Failure Detection Description:  Heartbeat ********
 
