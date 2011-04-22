@@ -270,7 +270,7 @@ public class Branch_Server {
 		return answer;
 	}
 
-        public void UpdateToBackups( String msg){
+        public void UpdateToBackups( String msg) throws NoPathException{
             Map.Entry pairs;
             Iterator it = cluster_peers.entrySet().iterator();
             Branch ibranch;
@@ -280,7 +280,7 @@ public class Branch_Server {
                 if (ibranch.is_master)
                     continue;
                 // fix here
-                String branchID = ibranch.getName;
+                String branchID = ibranch.getName();
                 messages.send(branchID,msg);
             }
         }
