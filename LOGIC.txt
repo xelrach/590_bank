@@ -1,0 +1,19 @@
+******** Quantification of timing and delay procedures ********
+
+
+******** Primary/backup method description ********
+
+
+******** Recovery protocol description ********
+
+
+******** Failure Detection Description:  Heartbeat ********
+
+We use a heartbeat method to detect failure:
+	- Every second, each node that thinks it's the master node in its cluster sends out a heartbeat message to all the other nodes its knows are in the cluster
+	- Every second, all nodes that think they are *not* masters in their clusters:
+		- Set a flag master_is_alive = false
+		- Heartbeat check:  If a heartbeat is received by the end of that second, master_is_alive becomes true
+		- If master_is_alive == false at the second of the second, after the heartbeat check, node infers failure of the master
+			- At this point, node initiates recovery process
+				- Starts by initiating selection of new master
