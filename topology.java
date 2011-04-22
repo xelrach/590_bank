@@ -81,7 +81,6 @@ public class topology {
         		String key = branch.getKey();
         		Branch thisBranch = branch.getValue();
 			thisBranch.processID = tmpID;
-
 			
 			peerList = thisBranch.processID + "=" + thisBranch.ServPort;
 
@@ -89,6 +88,7 @@ public class topology {
 				tmpID++;
 				peerList = peerList + "," + (tmpID) + "=" + backupStartingPort++;
 			}
+			tmpID++;
 
 			int newProcessID = lastProcessID;
 			int newPort = 0;
