@@ -119,13 +119,13 @@ public class Branch_Server {
 	 * Adds a branch that can be communicated with
 	 */
 	public void addOutEdge(Branch branch) {
-		log.fine("New Out Edge: " + branch.getName());
+//		log.fine("New Out Edge: " + branch.getName());
 		if (branch == null || outNeighbors.containsKey(branch.name) || this.name == branch.name) {
-			System.out.println("Not adding link");
+//			System.out.println("Not adding link");
 			return;
 		}
 
-		System.out.println("Adding link from " + this.name + " to " + branch.name);
+//		System.out.println("Adding link from " + this.name + " to " + branch.name);
 		outNeighbors.put(branch.name, branch);
 		return;
 	}
@@ -691,8 +691,6 @@ public class Branch_Server {
 	void transmitMarker(String originBranch, int snapshotID) {
 		String message = "s m " + name + " " + originBranch + " " + snapshotID;
 
-		System.out.println("");
-		System.out.println("Sending marker message: " + message);
 		try{
 		Thread.sleep(4000);
 		}catch(Exception e){}
@@ -740,6 +738,7 @@ class ServerThread implements Runnable {
 		log.info(name + " is running.");
 
     	try {
+		log.info(name + " is binding to port: " + port);
     		socket = new DatagramSocket(port);
     	} catch(Exception e) {
     		log.log(Level.INFO, "Could not create socket" + e);
@@ -761,7 +760,7 @@ class ServerThread implements Runnable {
         		if (dString==null) {
         			continue;
         		}
-        		System.out.println("Sending: " + dString);
+//        		System.out.println("Sending: " + dString);
         		    // send the response to the client at "address" and "port"
 
                 InetAddress address = packet.getAddress();
@@ -816,7 +815,7 @@ class NetworkWrapper {
 			InetAddress IPAddress = InetAddress.getByName("localhost");
 			byte[] sendData = message.getBytes();
 
-			System.out.println("Sending (to branch): " + message);
+//			System.out.println("Sending (to branch): " + message);
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);

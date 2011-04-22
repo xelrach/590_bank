@@ -131,8 +131,7 @@ public class topology {
 
 			}
 
-			/*
-		 exec_gui_string = "java GUI_Server_Process 127.0.0.1 " +
+		 exec_gui_string = "java ATMGUI 127.0.0.1 " +
 		 thisBranch.ServPort + " " + thisBranch.name;
 		 System.out.println(exec_gui_string); final Process p2 =
 		 Runtime.getRuntime().exec( exec_gui_string );
@@ -156,7 +155,6 @@ public class topology {
 				input.close();
 				} catch (Exception e) {}
 			} } ).start();
-			*/
         	}      
 
 
