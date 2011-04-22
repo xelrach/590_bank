@@ -12,6 +12,7 @@ public class topology {
         private static String filePath;
         private static int startingPort = 3000;
         private static int backupStartingPort = 7000;
+        private static int guiStartingPort = 9000;
 
         private static HashMap<String,Branch> alreadyCreatedServerList = new HashMap<String,Branch>();
 	private static int lastProcessID = 0;
@@ -131,8 +132,7 @@ public class topology {
 
 			}
 
-		 exec_gui_string = "java ATMGUI 127.0.0.1 " +
-		 thisBranch.ServPort + " " + thisBranch.name;
+		 exec_gui_string = "java ATMGUI " + thisBranch.name + " " + "127.0.0.1" + " " + thisBranch.ServPort + " " + (guiStartingPort++);
 		 System.out.println(exec_gui_string); final Process p2 =
 		 Runtime.getRuntime().exec( exec_gui_string );
 			new Thread(new Runnable() {public void run() {
