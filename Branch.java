@@ -148,7 +148,7 @@ public class Branch {
 
 	public void alive(boolean is_alive) {
 
-		System.out.println("Process " + processID + " marked " + (is_alive ? "alive" : "dead"));
+		System.out.println("Process " + processID + " marked " + (is_alive ? "alive" : "dead") + " by process " + Integer.toString(processID));
 		alive_marker = is_alive;
 	}
 }

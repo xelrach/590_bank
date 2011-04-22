@@ -41,13 +41,13 @@ public class Branch_Server {
 				    	/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
 				    	master_is_alive = false; // don't worry; this gets set true in process_input every second (if a heartbeat was received)
 				    }
-					
-					// now wait a second to allow sending (or receipt) or heartbeat
-		    		try {
-		    			Thread.sleep(1000);
-		    		} catch (Exception e) {
-		    		}
 		    	}
+	    		
+				// now wait a second to allow sending (or receipt) or heartbeat
+	    		try {
+	    			Thread.sleep(1000);
+	    		} catch (Exception e) {
+	    		}
 	    	}
 	    }
 	}
@@ -332,12 +332,14 @@ public class Branch_Server {
 
 		try {
 			log.log(Level.INFO, "Process " + this.processID  + " is sleeping while waiting for peer heartbeats.");
+			doHeartbeat = false;
 			Thread.sleep(10000);
 			log.log(Level.INFO, "Process " + this.processID  + " is done sleeping after waiting for peer heartbeats.");
 		} catch (Exception e) {
 		}
 
 		determine_master();
+		doHeartbeat = true;
 	}
 
 	public void determine_master() {
