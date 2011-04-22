@@ -53,12 +53,15 @@ public class Branch_Server_Process {
 			}
 
 			// set the master process to be the first peer, since that is how topo will feed it in
-			if (thisServerProcess.master_branch == null)
+			if (thisServerProcess.master_branch == null) {
 				thisServerProcess.master_branch = addedPeer;
+				System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
+			}
                 }
 
 
 
+		thisServerProcess.ready = true;
                 thisServerProcess.start();
 
                 System.out.println("Branch server is done.");

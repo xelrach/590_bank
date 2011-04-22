@@ -9,12 +9,14 @@ import java.util.logging.SimpleFormatter;
 
 public class Branch_Server {
 
+	boolean ready = false;
+
 	class HeartbeatThread extends Thread {
 	    public void run() {
 
-		while (log == null) {
+		while (!ready) {
 			try {
-				sleep(100);
+				sleep(1000);
 			} catch (Exception e) {
 			}
 		}
@@ -297,11 +299,13 @@ public class Branch_Server {
 	public String peer_acknowledge( String ack_id ) {
 		String answer = "ok";
 
+		log.log(Level.INFO, "Process " + processID  + " received peer heartbeat from " + ack_id );
+
 		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
 		if (branch_ack.is_master) {
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
-		branch_ack.alive_marker = true;
+		branch_ack.alive(true);
 		
 		return answer;
 	}
@@ -309,24 +313,28 @@ public class Branch_Server {
 	public void restore_cluster() {
 		Map.Entry pairs;
 
-		if (master_branch != null)
+		if (master_branch != null) {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was " + master_branch.processID );
-
-		log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
+		} else {
+			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
+		}
 
 		Iterator it = cluster_peers.entrySet().iterator();
 		Branch branch;
 		while (it.hasNext()) {
 			pairs = (Map.Entry)it.next();
 			branch = (Branch)pairs.getValue();
-			branch.alive_marker = false;
+
+			branch.alive(false);
+
+			log.log(Level.INFO, "Process " + this.processID  + " is sending a peer heartbeat to " + branch.processID);
 
 			transmit_alive( branch );
 		}
 
 		try {
 			log.log(Level.INFO, "Process " + this.processID  + " is sleeping while waiting for peer heartbeats.");
-		Thread.sleep(10000);
+			Thread.sleep(10000);
 			log.log(Level.INFO, "Process " + this.processID  + " is done sleeping after waiting for peer heartbeats.");
 		} catch (Exception e) {
 		}
@@ -351,7 +359,13 @@ public class Branch_Server {
 			branch.is_master = false;
 
 			if (newMaster == null || (branch.alive_marker && branch.processID < newMaster.processID)) {
+				log.log(Level.INFO, "Process " + this.processID  + " thinks new master might be " + newMaster.toString());
 				newMaster = branch;
+			} else {
+				if (!branch.alive_marker)
+					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's dead");
+				if ( branch.processID < newMaster.processID )
+					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's not next in line ");
 			}
 		}
 

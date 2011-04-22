@@ -145,4 +145,10 @@ public class Branch {
 		String answer = "[Branch " + name + ", PID " + processID + " on server " + server + " port " + ServPort + ":" + GUIPort + "]";
 		return answer;
 	}
+
+	public void alive(boolean is_alive) {
+
+		System.out.println("Process " + processID + " marked " + (is_alive ? "alive" : "dead"));
+		alive_marker = is_alive;
+	}
 }
