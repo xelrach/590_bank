@@ -61,7 +61,7 @@ public class Branch_Server {
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
 	public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
-	public HashMap<Integer, Branch> cluster_peers = new HashMap<Integer, Branch>();
+	public HashMap<Integer, Branch> cluster_peers = new HashMap<Integer, Branch>(); // <ProcessID, Branch>
 
 	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
@@ -165,6 +165,8 @@ public class Branch_Server {
 		String accountID = "";
 		String arg4 = "";
 		String arg5 = "";
+		
+		String UpdateMsg = new String();
 
 		if (tokens.length > 0) {
 			// messageID = tokens[0];
@@ -251,7 +253,7 @@ public class Branch_Server {
                                     UpdateMsg = input;
                                     UpdateToBackups(UpdateMsg);
                                 }
-				answer = backup_acknowledge( tokens[2] );
+				answer = peer_acknowledge( tokens[2] );
 			} else if (command.equals("s")) {
 				answer = sendState(Integer.parseInt(tokens[2]));
 			} else if (command.equals("qm")) {
@@ -275,11 +277,9 @@ public class Branch_Server {
             while (it.hasNext()) {
                 pairs = (Map.Entry)it.next();
                 ibranch = (Branch) pairs.getValue();
-
                 if (ibranch.is_master)
                     continue;
-                String branchID = ibranch.getBranchID();
-                messages.send(branchID,msg);
+                // fix here
             }
         }
 
