@@ -249,11 +249,6 @@ public class Branch_Server {
                                 //transfer function needs changing.
 			} else if (command.equals("b")) {
 				log.log(Level.INFO, "Process " + processID  + " received a heartbeat ");
-                                if (branch.is_master == true){
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-                                }
-				log.log(Level.INFO, "Process " + processID  + " received a peer heartbeat ");
 				answer = peer_acknowledge( tokens[2] );
 			} else if (command.equals("s")) {
 				answer = sendState(Integer.parseInt(tokens[2]));
