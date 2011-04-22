@@ -247,7 +247,7 @@ public class Branch_Server {
 			    UpdateToBackups(UpdateMsg);
                                 //transfer function needs changing.
 			} else if (command.equals("b")) {
-				log.log(Level.INFO, "Process " + processID  + " received a heartbeat ");
+				//log.log(Level.INFO, "Process " + processID  + " received a heartbeat");
 				answer = peer_acknowledge( tokens[2] );
 			} else if (command.equals("s")) {
 				answer = sendState(Integer.parseInt(tokens[2]));
@@ -295,6 +295,11 @@ public class Branch_Server {
 		log.log(Level.INFO, "Process " + processID  + " received peer heartbeat from " + ack_id );
 
 		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
+
+		if (branch_ack == null) {
+			log.log(Level.INFO, "Couldn't find peer for processID " + ack_id);
+			return "error";
+		}
 		if (branch_ack.is_master) {
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
@@ -369,6 +374,11 @@ public class Branch_Server {
 	}
 
 	public void transmit_alive (Branch process) {
+		if (this.branch.processID == process.processID) {
+			log.log(Level.INFO, "Why is process " + processID + " sending a heartbeat to itself?");
+			return;
+		}
+
 		if (process == null)
 			return;
 		try{
