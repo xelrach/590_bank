@@ -47,6 +47,7 @@ public class Branch_Server_Process {
                         String[] namePort = peers[i].split("=");
                         Branch addedPeer = new Branch(args[0], Integer.parseInt(namePort[1]));
 			addedPeer.processID = Integer.parseInt(namePort[0]);
+			addedPeer.ServPort = Integer.parseInt(namePort[1]);
 
 			if (addedPeer.processID != thisServerProcess.processID) {
 				thisServerProcess.addToCluster( addedPeer );
