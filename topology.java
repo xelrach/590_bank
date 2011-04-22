@@ -15,7 +15,7 @@ public class topology {
         private static int guiStartingPort = 9000;
 
         private static HashMap<String,Branch> alreadyCreatedServerList = new HashMap<String,Branch>();
-	private static int lastProcessID = 0;
+	private static int lastProcessID = 1;
         private static final int NUMBER_OF_BACKUPS = 2;
 
         /**
