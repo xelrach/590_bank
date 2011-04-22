@@ -7,9 +7,15 @@ public class Branch_Server_Process {
                 System.out.println("Server started for " + args[0]);
 
                 thisServerProcess = new Branch_Server(args[0], Integer.parseInt(args[1]));
+	
+		thisServerProcess.processID = Integer.parseInt(args[2]);
 
-                String inNeighborsStr = args[2];
+		if (thisServerProcess.branch.ServPort < 7000)
+			thisServerProcess.branch.is_master = true;
+
+                String inNeighborsStr = args[3];
                 String[] inNeighbors = inNeighborsStr.split(",");
+
                 for (int i = 0; i < inNeighbors.length; i++) {
                         if (inNeighbors[i].length() < 2)
                                 continue;                
@@ -18,7 +24,7 @@ public class Branch_Server_Process {
                         thisServerProcess.addInEdge( addedBranch );
                 }
 
-                String outNeighborsStr = args[3];       
+                String outNeighborsStr = args[4];
                 String[] outNeighbors = outNeighborsStr.split(",");
                 for (int i = 0; i < outNeighbors.length; i++) {
                         if (outNeighbors[i].length() < 2)
@@ -27,6 +33,23 @@ public class Branch_Server_Process {
                         Branch addedBranch = new Branch(namePort[0], Integer.parseInt(namePort[1]));
                         thisServerProcess.addOutEdge( addedBranch );
                 }
+
+                String peersStr = args[5];
+                String[] peers = peersStr.split(",");
+
+                for (int i = 0; i < peers.length; i++) {
+                        if (peers[i].length() < 2)
+                                continue;
+
+                        String[] namePort = peers[i].split("=");
+                        Branch addedPeer = new Branch(args[0], Integer.parseInt(namePort[1]));
+			addedPeer.processID = Integer.parseInt(namePort[0]);
+
+			if (addedPeer.processID != thisServerProcess.processID) {
+				thisServerProcess.addToCluster( addedPeer );
+			}
+                }
+
 
                 thisServerProcess.start();
 

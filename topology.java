@@ -11,8 +11,12 @@ import java.util.*;
 public class topology {
         private static String filePath;
         private static int startingPort = 3000;
+        private static int backupStartingPort = 7000;
+
         private static HashMap<String,Branch> alreadyCreatedServerList = new HashMap<String,Branch>();
-        
+	private static int lastProcessID = 0;
+        private static final int NUMBER_OF_BACKUPS = 2;
+
         /**
          * Invokes method on the Branch class to create one branch server.      
          @param serverName A string containing the unique name of the server.
@@ -68,13 +72,41 @@ public class topology {
         	String exec_string = "";
         	String exec_gui_string = "";
 
+		String peerList = "";
+
         	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
         		String key = branch.getKey();
         		Branch thisBranch = branch.getValue();
+			thisBranch.processID = lastProcessID++;
 
-        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + thisBranch.getBranches() + " &";
+			
+			peerList = thisBranch.processID + "=" + thisBranch.ServPort;
+
+			for (int i = 0; i < NUMBER_OF_BACKUPS; i++) {
+				peerList = peerList + "," + (lastProcessID++) + "=" + backupStartingPort++;
+			}
+
+			lastProcessID -= (NUMBER_OF_BACKUPS + 1);
+
+			int newProcessID = lastProcessID;
+			int newPort = 0;
+
+			backupStartingPort -= NUMBER_OF_BACKUPS;
+
+			for (int i = 0; i < NUMBER_OF_BACKUPS + 1; i++) {
+
+			newPort = thisBranch.ServPort;
+			if (i > 0)
+				newPort = backupStartingPort++;
+
+			newProcessID++;
+			lastProcessID++;
+			
+        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + newProcessID + " " + thisBranch.getBranches() + " " + peerList + " &";
+
         		System.out.println(exec_string);
         		final Process p = Runtime.getRuntime().exec( exec_string );
+
 			new Thread(new Runnable() {public void run() {
 				try{
 				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -95,6 +127,9 @@ public class topology {
 				input.close();
 				} catch(Exception e) {}
 			} } ).start();
+
+
+			}
 
         		exec_gui_string = "java GUI_Server_Process 127.0.0.1 " + thisBranch.ServPort + " " + thisBranch.name;
         		System.out.println(exec_gui_string);
