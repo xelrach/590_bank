@@ -259,6 +259,7 @@ public class Branch_Server {
 				answer = sendState(Integer.parseInt(tokens[2]));
 			} else if (command.equals("qm")) {
 				answer = queryMasterRespond();
+				return answer; // we just want the integer
 			}
 		}
 /*
@@ -307,6 +308,7 @@ public class Branch_Server {
 			return "error";
 		}
 		if (branch_ack.is_master) {
+			log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
 
@@ -407,8 +409,8 @@ public class Branch_Server {
 
 	public String fakecrash(){
 		String answer = "error";
-		int sleepsecond = 15;
-		sleepsecond += (int)(Math.random() * 106);
+		int sleepsecond = 5;
+		//sleepsecond += (int)(Math.random() * 106);
 		long sleeptime = sleepsecond * 1000;
 		try{
 			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
@@ -457,13 +459,15 @@ public class Branch_Server {
 		return null;*/
 		String sMaster = "";
 		try{
-		sMaster = messages.send(branch, otherBranch, "qm");
+		sMaster = messages.send(branch, otherBranch, "s qm");
 		}catch (Exception e){}
-		return cluster_peers.get(Integer.parseInt(sMaster));
+		int primMasterProcessID = Integer.parseInt(sMaster);
+		Integer masterProcessID = new Integer(primMasterProcessID);
+		return cluster_peers.get(masterProcessID);
 	}
 
 	String queryMasterRespond() {
-		return "qmr" + Integer.toString(master_branch.processID);
+		return Integer.toString(master_branch.processID);
 	}
 
 	public String requestState(Branch otherBranch) {
