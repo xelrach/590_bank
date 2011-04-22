@@ -4,6 +4,7 @@ public class Branch_Server_Process {
 
         public static void main(String args[]) throws Exception  {
 
+		
                 System.out.println("Server started for " + args[0]);
 
                 thisServerProcess = new Branch_Server(args[0], Integer.parseInt(args[1]));
@@ -11,8 +12,10 @@ public class Branch_Server_Process {
 		thisServerProcess.processID = Integer.parseInt(args[2]);
 		thisServerProcess.branch.processID = Integer.parseInt(args[2]);
 
-		if (thisServerProcess.branch.ServPort < 7000)
+		if (thisServerProcess.branch.ServPort < 7000) {
 			thisServerProcess.branch.is_master = true;
+			thisServerProcess.master_branch = thisServerProcess.branch;
+		}
 		else
 			thisServerProcess.branch.GUIPort = 0;
 
@@ -49,6 +52,8 @@ public class Branch_Server_Process {
 			addedPeer.processID = Integer.parseInt(namePort[0]);
 			addedPeer.ServPort = Integer.parseInt(namePort[1]);
 
+			//System.out.println("Adding peer process for " + thisServerProcess.processID + ": " + namePort[0] + " port " + namePort[1]);
+
 			if (addedPeer.processID != thisServerProcess.processID) {
 				thisServerProcess.addToCluster( addedPeer );
 			}
@@ -56,7 +61,7 @@ public class Branch_Server_Process {
 			// set the master process to be the first peer, since that is how topo will feed it in
 			if (thisServerProcess.master_branch == null) {
 				thisServerProcess.master_branch = addedPeer;
-				System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
+				//System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
 			}
                 }
                 thisServerProcess.ready = true;

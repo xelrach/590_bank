@@ -13,6 +13,12 @@ public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
 	    public void run() {
+
+				try {
+					sleep(5000);
+				} catch (Exception e) {
+				}
+
 	
 			while (ready == false) {
 				try {
@@ -303,6 +309,8 @@ public class Branch_Server {
 		if (branch_ack.is_master) {
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
+
+		System.out.println("Process " + processID + " marking " + ack_id + " alive");
 		branch_ack.alive(true);
 		
 		return answer;
@@ -311,22 +319,31 @@ public class Branch_Server {
 	public void restore_cluster() {
 		Map.Entry pairs;
 
+//		if (processID != 2)
+//			return;
+
 		if (master_branch != null) {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was " + master_branch.processID );
 		} else {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
 		}
 
-		Iterator it = cluster_peers.entrySet().iterator();
 		Branch branch;
+
+		Iterator it = cluster_peers.entrySet().iterator();
 		while (it.hasNext()) {
 			pairs = (Map.Entry)it.next();
 			branch = (Branch)pairs.getValue();
 
+			System.out.println("Process " + processID + " marking " + branch.processID + " dead");
 			branch.alive(false);
+		}
 
+		it = cluster_peers.entrySet().iterator();
+		while (it.hasNext()) {
+			pairs = (Map.Entry)it.next();
+			branch = (Branch)pairs.getValue();
 			log.log(Level.INFO, "Process " + this.processID  + " is sending a peer heartbeat to " + branch.processID);
-
 			transmit_alive( branch );
 		}
 
@@ -369,7 +386,7 @@ public class Branch_Server {
 			}
 		}
 
-//		log.log(Level.INFO, "Process " + this.processID  + " says the new master is " + newMaster.toString());
+		log.log(Level.INFO, "Process " + this.processID  + " says the new master is " + newMaster.toString());
 
 		newMaster.is_master = true;
 		master_branch = newMaster;
