@@ -15,7 +15,7 @@ public class topology {
         private static int guiStartingPort = 9000;
 
         private static HashMap<String,Branch> alreadyCreatedServerList = new HashMap<String,Branch>();
-	private static int lastProcessID = 1;
+	private static int lastProcessID = 0;
         private static final int NUMBER_OF_BACKUPS = 2;
 
         /**
@@ -75,19 +75,20 @@ public class topology {
 
 		String peerList = "";
 
+		int tmpID = 1;
+
         	for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
         		String key = branch.getKey();
         		Branch thisBranch = branch.getValue();
-			thisBranch.processID = lastProcessID++;
+			thisBranch.processID = tmpID;
 
 			
 			peerList = thisBranch.processID + "=" + thisBranch.ServPort;
 
 			for (int i = 0; i < NUMBER_OF_BACKUPS; i++) {
-				peerList = peerList + "," + (lastProcessID++) + "=" + backupStartingPort++;
+				tmpID++;
+				peerList = peerList + "," + (tmpID) + "=" + backupStartingPort++;
 			}
-
-			lastProcessID -= (NUMBER_OF_BACKUPS + 1);
 
 			int newProcessID = lastProcessID;
 			int newPort = 0;
