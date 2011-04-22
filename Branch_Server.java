@@ -280,6 +280,8 @@ public class Branch_Server {
                 if (ibranch.is_master)
                     continue;
                 // fix here
+                String branchID = ibranch.getName;
+                messages.send(branchID,msg);
             }
         }
 
