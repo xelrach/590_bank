@@ -27,6 +27,8 @@ public class ATMGUI extends javax.swing.JFrame {
     public static String GUI_Id="";
     public static String IPadd="";
     public static String port02="";
+    public static int guiListenPort;
+
     public GUIServer GS;
     //public static int MsgID=1000;
 
@@ -562,22 +564,10 @@ public class ATMGUI extends javax.swing.JFrame {
     * @param args the command line arguments
     */
     public static void main(String args[]) {
-        if (args.length==1)
-            IPadd=args[0];
-        else if(args.length == 2)
-        {
-            IPadd=args[0];
-            port02=args[1];
-        }
-        else if (args.length ==3)
-        {
-            IPadd=args[0];
-            port02=args[1];
-            GUI_Id=args[2];
-        }
-        else
-        {
-        }
+	GUI_Id = args[0];
+	IPadd = args[1];
+	port02 = args[2];
+	guiListenPort = Integer.parseInt(args[3]);
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new ATMGUI().setVisible(true);
@@ -665,8 +655,7 @@ public class ATMGUI extends javax.swing.JFrame {
 
         public void run(){
             try{
-                port=Integer.parseInt(PortText02.getText());
-                socket=new DatagramSocket(port);
+                socket=new DatagramSocket(guiListenPort);
             }catch(Exception e) {
                 running=false;	}
             System.out.println("GUI server thread starts at port: "+String.format("%d", port));

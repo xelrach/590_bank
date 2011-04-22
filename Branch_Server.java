@@ -154,8 +154,7 @@ public class Branch_Server {
 	}
 
 	public String process_input(String input) throws NoPathException {
-		log.log(Level.INFO,name + " recieved " + input);
-//		System.out.println(name + " recieved " + input);
+//		log.log(Level.INFO,name + " recieved " + input);
 		String answer = "";
 
 		String[] tokens = input.split(" ");
@@ -729,8 +728,7 @@ class ServerThread implements Runnable {
     	byte[] buf = new byte[message.length()];
     	buf = message.getBytes();
     	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
-    	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
-    	System.out.println(name + " sending " + message + " to port: " + port);
+//    	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
         socket.send(packet);
     }
 
