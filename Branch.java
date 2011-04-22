@@ -14,12 +14,11 @@ public class Branch {
 	public boolean alive_marker = true;
 
 	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
-        public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
-        public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
-
-    Branch() {
-    	
-    }
+	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
+	public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
+ 
+	Branch() {
+	}
     
 	Branch(Branch other) {
 		name = other.name;
@@ -115,9 +114,6 @@ public class Branch {
                 branches.put(branch.name, branch);
                 return;
         }
-
-
-
 
 	/**
 	 * Adds a branch that can be communicated with

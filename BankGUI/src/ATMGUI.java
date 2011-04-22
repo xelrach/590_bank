@@ -27,6 +27,7 @@ public class ATMGUI extends javax.swing.JFrame {
     public static String GUI_Id="";
     public static String IPadd="";
     public static String port02="";
+    public GUIServer GS;
     //public static int MsgID=1000;
 
     public static boolean isAccount(String str)
@@ -59,6 +60,9 @@ public class ATMGUI extends javax.swing.JFrame {
             PortText01.setText(GUI_Id);
         if (!port02.equals(""))
             PortText02.setText(port02);
+        int port=Integer.parseInt(PortText02.getText());
+        GS=new GUIServer(port);
+        (new Thread(GS)).start();
     }
 
     /** This method is called from within the constructor to
@@ -558,11 +562,6 @@ public class ATMGUI extends javax.swing.JFrame {
     * @param args the command line arguments
     */
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ATMGUI().setVisible(true);
-            }
-        });
         if (args.length==1)
             IPadd=args[0];
         else if(args.length == 2)
@@ -579,6 +578,11 @@ public class ATMGUI extends javax.swing.JFrame {
         else
         {
         }
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new ATMGUI().setVisible(true);
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -615,4 +619,96 @@ public class ATMGUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
 
+
+    //receiving: s c 4444 127.0.0.1
+    //ip address is not required
+    public void ProcessPacket(String packet){
+        packet = packet.trim();
+        System.out.println(packet);
+        String[] items = packet.split(" ");
+        if (items.length < 3) return;
+        if (!items[0].equals("s")) return;
+        if (items[1].equals("c")){
+            try{
+                int cport = Integer.parseInt(items[2]);
+                PortText02.setText(items[2]);
+            }
+            catch(Exception e){
+                return;
+            }
+            if (items.length>=4)
+            {
+                try{
+                    InetAddress iaddress=InetAddress.getByName(items[3]);
+                    IPTxt.setText(items[3]);
+                }
+                catch(Exception e){
+                }
+            }
+        }
+    }
+
+    class GUIServer implements Runnable{
+        protected boolean running=true;
+        protected DatagramSocket socket = null;
+        public int port;
+
+        public GUIServer(int port)
+        {
+            this.port=port;
+        }
+
+        //public void StopThread()
+        //{
+        //    running=false;
+        //}
+
+        public void run(){
+            try{
+                port=Integer.parseInt(PortText02.getText());
+                socket=new DatagramSocket(port);
+            }catch(Exception e) {
+                running=false;	}
+            System.out.println("GUI server thread starts at port: "+String.format("%d", port));
+            while(running){
+                try{
+                    int iport=Integer.parseInt(PortText02.getText());
+                    if (port!=iport)
+                    {
+                        port=iport;
+                        System.out.println("GUI server thread starts at port: "+String.format("%d", port));
+                        socket=new DatagramSocket(port);
+                    }
+                }
+                catch(Exception e) {
+                    running=false;
+                    continue;
+                }
+                //System.out.println("check."+String.format("%d", port));
+                try{
+                    byte[] buf = new byte[256];
+                    // byte[] inbuf = new byte[256];
+                    // receive request
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    socket.setSoTimeout(1000);
+                    socket.receive(packet);
+                    System.out.println("received something.");
+
+                    String input = new String(buf);
+
+                    ProcessPacket(input);
+                    //snapans.setText(ProcessSnap(input));
+                }
+                catch(IOException e){
+                    //running = false;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+            }
+            System.out.println("GUI server thread closed.");
+            socket.close();
+        }
+    }
 }
