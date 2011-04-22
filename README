@@ -4,19 +4,8 @@ How to use this system:
 01 02
 05 01
 .. meaning that branch 01 can communicate with branch 02, and branch 05 can communicate with branch 01
-
-2) python test.py (if you rename the topology file to something besides topo, use--topology=TOPO_NEW_FILE_NAME)
-	- this script will run ./make for you
-	- then the script will start up branch servers and GUIs by running java topology <TOPO_FILE_NAME>
-
-3) Account format:  0A.BBBBB ( A = GUI ID; BBBBB = arbitrary 5-digit account code )
-
-4) Follow the documentation in TestPlan to easily test snapshots and in-process transfers.
-
-Note that we pre-filled the Branch GUI fields with the ID of the relevant GUI where applicable.  Now it's more clear what you can and can't do.
-
-To get more verbose output, run using "java topology TOPO"
-
-The marker messages are on a 4 second delay, this allows for the user to manually send a transfer to test the transfer functionality.
-
-The branches can handle multiple snapshots happening at the same time and are fine with deposits, withdrawals, et cetera.
+	
+2) Click the FAIL button on the top-right of any of the branch GUIs
+	- This will cause the branch to go offline for a random time period in [15sec,2min]
+	- Wait for the amount of time specified in the console output
+	- After this time, the branch will come back online
