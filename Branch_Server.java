@@ -13,7 +13,12 @@ public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
 	    public void run() {
-	
+			
+			try {
+				sleep(5000);
+			} catch (Exception e) {
+			}
+			
 			while (ready == false) {
 				try {
 					sleep(1000);
