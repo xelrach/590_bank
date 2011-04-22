@@ -769,13 +769,16 @@ class ServerThread implements Runnable {
     		    send(dString,address,port);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    log.log(Level.INFO, "SERVER FAILURE due to IOException:  " + e);
     		        serverRunning = false;
                 } catch (NullPointerException e) {
                     e.printStackTrace();
+                    log.log(Level.INFO, "SERVER FAILURE due to NullPointerException:  " + e);
     		        serverRunning = false;
     			} catch (NoPathException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					log.log(Level.INFO, "SERVER FAILURE due to NoPathException:  " + e);
 					serverRunning = false;
 				}
 
@@ -783,6 +786,7 @@ class ServerThread implements Runnable {
     			Thread.sleep(100);
     		} catch (Exception e) {
     		    serverRunning = false;
+    		    log.log(Level.INFO, "SERVER FAILURE during Thread.sleep:  " + e);
     		    System.out.println("Sleep exception caused branch server to crash");
     		}
         }
