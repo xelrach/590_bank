@@ -204,7 +204,7 @@ public class Branch_Server {
 		if (messageType == 'c') {
 			// client request
 
-			log.log(Level.INFO, "Client command is [" + command + "]");
+			log.log(Level.INFO, branch.processID + " got client command is [" + command + "]");
 
 			if (command.equals("w")) {
 				++local_time;
@@ -774,7 +774,7 @@ class ServerThread implements Runnable {
 		log.info(name + " is running.");
 
     	try {
-		log.info(name + " is binding to port: " + port);
+		log.info(name + "." + thisBranch.processID + " is binding to port: " + port);
     		socket = new DatagramSocket(port);
     	} catch(Exception e) {
     		log.log(Level.INFO, "Could not create socket" + e);
