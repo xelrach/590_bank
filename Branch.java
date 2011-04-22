@@ -43,9 +43,6 @@ public class Branch {
 		GUIPort = n_guiport;
 	}
 
-	public String toString() {
-		return name+":"+server+":"+ServPort+":"+GUIPort;
-	}
 
 	public String getName() {
 		return name;
@@ -143,4 +140,9 @@ public class Branch {
 		return;
 	}
 
+
+	public String toString() {
+		String answer = "[Branch " + name + ", PID " + processID + " on server " + server + " port " + ServPort + ":" + GUIPort + "]";
+		return answer;
+	}
 }

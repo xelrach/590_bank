@@ -9,9 +9,12 @@ public class Branch_Server_Process {
                 thisServerProcess = new Branch_Server(args[0], Integer.parseInt(args[1]));
 	
 		thisServerProcess.processID = Integer.parseInt(args[2]);
+		thisServerProcess.branch.processID = Integer.parseInt(args[2]);
 
 		if (thisServerProcess.branch.ServPort < 7000)
 			thisServerProcess.branch.is_master = true;
+		else
+			thisServerProcess.branch.GUIPort = 0;
 
                 String inNeighborsStr = args[3];
                 String[] inNeighbors = inNeighborsStr.split(",");
@@ -48,7 +51,12 @@ public class Branch_Server_Process {
 			if (addedPeer.processID != thisServerProcess.processID) {
 				thisServerProcess.addToCluster( addedPeer );
 			}
+
+			// set the master process to be the first peer, since that is how topo will feed it in
+			if (thisServerProcess.master_branch == null)
+				thisServerProcess.master_branch = addedPeer;
                 }
+
 
 
                 thisServerProcess.start();

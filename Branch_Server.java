@@ -11,6 +11,14 @@ public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
 	    public void run() {
+
+		while (log == null) {
+			try {
+				sleep(100);
+			} catch (Exception e) {
+			}
+		}
+
 	    	while (true) {
 	    		if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
@@ -66,11 +74,7 @@ public class Branch_Server {
 	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
 
-	public Branch_Server(String name, int port) {
-		 
-		heartbeat = new HeartbeatThread();
-		heartbeat.start();
-		
+	public Branch_Server(String name, int port) {		 
 		this.name = name;
 		this.port = port;
 		this.backupID = backupID;
@@ -89,13 +93,18 @@ public class Branch_Server {
 		fh.setFormatter(new SimpleFormatter());
 		branch.name = name;
 		branch.ServPort = port;
+
 		branch.GUIPort = port + 1000;
-	    serverThread =  new ServerThread(this, name, port);
+		serverThread =  new ServerThread(this, name, port);
 		serverThread.port = port;
 		serverThread.name = name;
 		messages = new NetworkWrapper(outNeighbors);
 
 		log.log(Level.INFO, "Branch name: " + name + " Port: " + port);
+
+
+		heartbeat = new HeartbeatThread();
+		heartbeat.start();
 	}
 
 	int getGUIPort() {
@@ -112,6 +121,7 @@ public class Branch_Server {
 
 
 	public void addToCluster(Branch branch) {
+		log.log(Level.INFO, "Adding process " + branch.processID + " to process " + this.processID);
 		cluster_peers.put( new Integer(branch.processID), branch);
 	}
 
@@ -299,6 +309,11 @@ public class Branch_Server {
 	public void restore_cluster() {
 		Map.Entry pairs;
 
+		if (master_branch != null)
+			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was " + master_branch.processID );
+
+		log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
+
 		Iterator it = cluster_peers.entrySet().iterator();
 		Branch branch;
 		while (it.hasNext()) {
@@ -310,7 +325,9 @@ public class Branch_Server {
 		}
 
 		try {
+			log.log(Level.INFO, "Process " + this.processID  + " is sleeping while waiting for peer heartbeats.");
 		Thread.sleep(10000);
+			log.log(Level.INFO, "Process " + this.processID  + " is done sleeping after waiting for peer heartbeats.");
 		} catch (Exception e) {
 		}
 
@@ -322,6 +339,8 @@ public class Branch_Server {
 		Map.Entry pairs;
 		Branch newMaster = this.branch;
 		
+		log.log(Level.INFO, "Process " + this.processID  + " is determining the new master.");
+
 		Iterator it = cluster_peers.entrySet().iterator();
 		Branch branch;
 		while (it.hasNext()) {
@@ -331,21 +350,23 @@ public class Branch_Server {
 
 			branch.is_master = false;
 
-			if (newMaster == null || branch.processID < newMaster.processID) {
+			if (newMaster == null || (branch.alive_marker && branch.processID < newMaster.processID)) {
 				newMaster = branch;
 			}
 		}
 
-		newMaster.is_master = true;
+		log.log(Level.INFO, "Process " + this.processID  + " says the new master is " + newMaster.toString());
 
+		newMaster.is_master = true;
+		master_branch = newMaster;
 	}
 
 	public void transmit_alive (Branch process) {
 		if (process == null)
 			return;
 		try{
-		messages.send( this.branch, process, "b " + this.processID );
-		}catch(Exception e) {}
+			messages.send( this.branch, process, "b " + this.processID );
+		} catch(Exception e) {}
 	}
 
 	public String fakecrash(){
