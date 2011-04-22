@@ -71,7 +71,7 @@ public class Branch_Server {
 	public HashMap<String, Account> accounts = new HashMap<String, Account>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
 	public HashMap<String, Branch> outNeighbors = new HashMap<String, Branch>();
-	public HashMap<Integer, Branch> cluster_peers = new HashMap<Integer, Branch>(); // <ProcessID, Branch>
+	public Hashtable<Integer, Branch> cluster_peers = new Hashtable<Integer, Branch>(); // <ProcessID, Branch>
 
 	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
@@ -205,59 +205,47 @@ public class Branch_Server {
 		if (messageType == 'c') {
 			// client request
 
-			System.out.println("Command is [" + command + "]");
+			log.log(Level.INFO, "Client command is [" + command + "]");
 
 			if (command.equals("w")) {
 				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
-                                if (branch.is_master == true){
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-                                }
+				UpdateMsg = input;
+                                UpdateToBackups(UpdateMsg);
 			} else if (command.equals("f")){
                                 answer=fakecrash();
                         }else if (command.equals("d")) {
 				++local_time;
 				answer = deposit(accountID, Float.parseFloat(arg4));
-                                if (branch.is_master == true){
                                     UpdateMsg = input;
                                     UpdateToBackups(UpdateMsg);
-                                }
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
-                                if (branch.is_master == true){
                                     UpdateMsg = input;
                                     UpdateToBackups(UpdateMsg);
-                                }
                                 //transfer function needs changing.
 			} else if (command.equals("s")) {
 				answer = startSnapshot();
 			} else if (command.equals("q")) {
+				//Query message
 				++local_time;
 				answer = query(accountID);
 			} else if (command.equals("k")) {
-                            if (branch.is_master == true){
+				//Kill message
                                     UpdateMsg = input;
                                     UpdateToBackups(UpdateMsg);
-                                }
 			    this.serverThread.serverRunning = false;
 				System.exit(0);
 			}
 		} else if (messageType == 's') {
 			if (command.equals("m")) {
-                                if (branch.is_master == true){
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-                                }
 				answer = markerMessage( tokens[2], tokens[3], tokens[4] );
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
-                                if (branch.is_master == true){
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-                                }
+			    UpdateMsg = input;
+			    UpdateToBackups(UpdateMsg);
                                 //transfer function needs changing.
 			} else if (command.equals("b")) {
 				log.log(Level.INFO, "Process " + processID  + " received a heartbeat ");
@@ -266,7 +254,6 @@ public class Branch_Server {
                                     UpdateToBackups(UpdateMsg);
                                 }
 				log.log(Level.INFO, "Process " + processID  + " received a peer heartbeat ");
-
 				answer = peer_acknowledge( tokens[2] );
 			} else if (command.equals("s")) {
 				answer = sendState(Integer.parseInt(tokens[2]));
@@ -284,18 +271,27 @@ public class Branch_Server {
 		return answer;
 	}
 
-        public void UpdateToBackups( String msg) throws NoPathException{
-            Map.Entry pairs;
-            Iterator it = cluster_peers.entrySet().iterator();
-            Branch ibranch;
+        public void UpdateToBackups(String msg) {
+		if (!branch.is_master) {
+			return;
+		}
+            Iterator it = cluster_peers.values().iterator();
+	    log.log(Level.INFO, "cluster_peers size: "+cluster_peers.size());
+            Branch otherBranch;
             while (it.hasNext()) {
-                pairs = (Map.Entry)it.next();
-                ibranch = (Branch) pairs.getValue();
-                if (ibranch.is_master)
+                otherBranch = (Branch)it.next();
+		log.log(Level.INFO, "Considering forwarding to: "+otherBranch.processID);
+                if (otherBranch.is_master) {
+			log.log(Level.INFO, "Had is_master. WHY???");
                     continue;
+		}
                 // fix here
-                String branchID = ibranch.getName();
-                messages.send(branchID,msg);
+		try{
+			log.log(Level.INFO, "Forwarding " + msg + " to " + otherBranch.processID);
+	                messages.send(branch,otherBranch,msg,false);
+		}catch(Exception e){
+			log.log(Level.SEVERE,e.toString());
+		}
             }
         }
 
@@ -350,7 +346,7 @@ public class Branch_Server {
 		Map.Entry pairs;
 		Branch newMaster = this.branch;
 		
-		log.log(Level.INFO, "Process " + this.processID  + " is determining the new master.");
+//		log.log(Level.INFO, "Process " + this.processID  + " is determining the new master.");
 
 		Iterator it = cluster_peers.entrySet().iterator();
 		Branch branch;
@@ -372,7 +368,7 @@ public class Branch_Server {
 			}
 		}
 
-		log.log(Level.INFO, "Process " + this.processID  + " says the new master is " + newMaster.toString());
+//		log.log(Level.INFO, "Process " + this.processID  + " says the new master is " + newMaster.toString());
 
 		newMaster.is_master = true;
 		master_branch = newMaster;
@@ -831,7 +827,12 @@ class ServerThread implements Runnable {
 
 }
 
-class NoPathException extends Exception {}
+class NoPathException extends Exception {
+	NoPathException(String s) {
+		super(s);
+	}
+	NoPathException() {}
+}
 
 class NetworkWrapper {
 	public HashMap<String, Branch> topology = new HashMap<String, Branch>();
@@ -840,12 +841,12 @@ class NetworkWrapper {
 		this.topology = topology;
 	}
 
-	public String send(String address, int port, String message) throws NoPathException {
+	public String send(String address, int port, String message, boolean waitForResponse) throws NoPathException {
 		DatagramSocket clientSocket;
 		try {
 			clientSocket = new DatagramSocket();
 		} catch (Exception e) {
-			throw new NoPathException();
+			throw new NoPathException("Could not make socket");
 		}
 		try {
 			InetAddress IPAddress = InetAddress.getByName("localhost");
@@ -855,32 +856,44 @@ class NetworkWrapper {
 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
-			byte[] buff = new byte[65536];
-			DatagramPacket response = new DatagramPacket(buff, 100);
-			clientSocket.receive(response);
-			clientSocket.close();
-			return new String(response.getData());
+			if (waitForResponse) {
+				byte[] buff = new byte[65536];
+				DatagramPacket response = new DatagramPacket(buff, 100);
+				clientSocket.receive(response);
+				clientSocket.close();
+				return new String(response.getData());
+			} else {
+				return "";
+			}
 		} catch( Exception e ) {
 			clientSocket.close();
-			throw new NoPathException();
+			throw new NoPathException(e.toString());
 		}
 	}
 
-	public String send( Branch fromProcess, Branch toProcess, String message) throws NoPathException {
+	public String send(String address, int port, String message) throws NoPathException {
+		return send(address, port, message, true);
+	}
+
+	public String send( Branch fromProcess, Branch toProcess, String message, boolean waitForResponse) throws NoPathException {
 		if (fromProcess.name != toProcess.name)
 			return send(toProcess.name, message);
 
-		return send(toProcess.server, toProcess.ServPort, message);
+		return send(toProcess.server, toProcess.ServPort, message, waitForResponse);
+	}
+
+	public String send( Branch fromProcess, Branch toProcess, String message) throws NoPathException {
+		return send(fromProcess, toProcess, message, true);
 	}
 
 	public String send(String branchID, String message) throws NoPathException {
 		if (!topology.containsKey(branchID)) {
-			throw new NoPathException();
+			throw new NoPathException("Branch is not in topology");
 		}
 
 		Branch branch = topology.get(branchID);
 		if (branch == null)
-			throw new NoPathException();
+			throw new NoPathException("Branch is not in topology");
 
 		return send("localhost", branch.ServPort, message);
 	}

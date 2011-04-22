@@ -670,6 +670,7 @@ public class ATMGUI extends javax.swing.JFrame {
                     }
                 }
                 catch(Exception e) {
+		    System.out.println(e);
                     running=false;
                     continue;
                 }
