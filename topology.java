@@ -102,7 +102,7 @@ public class topology {
 			newProcessID++;
 			lastProcessID++;
 			
-        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + thisBranch.ServPort + " " + newProcessID + " " + thisBranch.getBranches() + " " + peerList + " &";
+        		exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + newPort + " " + newProcessID + " " + thisBranch.getBranches() + " " + peerList + " &";
 
         		System.out.println(exec_string);
         		final Process p = Runtime.getRuntime().exec( exec_string );
