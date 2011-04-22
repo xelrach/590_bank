@@ -738,12 +738,12 @@ class ServerThread implements Runnable {
 
     public void run() {
 		log.info(name + " is running.");
-	    this.port = port;
 
     	try {
     		socket = new DatagramSocket(port);
     	} catch(Exception e) {
-
+    		log.log(Level.INFO, "Could not create socket" + e);
+    		serverRunning = false;
     	}
 
         while (serverRunning) {
