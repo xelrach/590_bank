@@ -13,13 +13,13 @@ public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
 	    public void run() {
-
-		while (!ready) {
-			try {
-				sleep(1000);
-			} catch (Exception e) {
+	
+			while (ready == false) {
+				try {
+					sleep(1000);
+				} catch (Exception e) {
+				}
 			}
-		}
 
 	    	while (true) {
 	    		if (doHeartbeat == true) {
@@ -103,10 +103,6 @@ public class Branch_Server {
 		messages = new NetworkWrapper(outNeighbors);
 
 		log.log(Level.INFO, "Branch name: " + name + " Port: " + port);
-
-
-		heartbeat = new HeartbeatThread();
-		heartbeat.start();
 	}
 
 	int getGUIPort() {
@@ -163,6 +159,9 @@ public class Branch_Server {
 			thread.start();
 		}
 		log.log(Level.INFO,"Done starting branch " + branch.name);
+		heartbeat = new HeartbeatThread();
+		heartbeat.start();
+		
 	}
 
 	public String process_input(String input) throws NoPathException {
