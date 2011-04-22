@@ -153,7 +153,7 @@ public class Branch_Server {
 		log.log(Level.INFO,"Done starting branch " + branch.name);
 	}
 
-	public String process_input(String input) {
+	public String process_input(String input) throws NoPathException {
 		log.log(Level.INFO,name + " recieved " + input);
 //		System.out.println(name + " recieved " + input);
 		String answer = "";
@@ -773,7 +773,11 @@ class ServerThread implements Runnable {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
     		        serverRunning = false;
-    			}
+    			} catch (NoPathException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					serverRunning = false;
+				}
 
     		try {
     			Thread.sleep(100);

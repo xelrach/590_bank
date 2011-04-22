@@ -22,9 +22,6 @@ ATMGUI.class: BankGUI/src/ATMGUI.java BankGUI/src/ATMGUI.form
 	ant -f BankGUI/build.xml
 	cp BankGUI/build/classes/ATMGUI*.class ./
 
-#GUI_Server_Process.class: GUI_Server_Process.java ATMGUI.class
-#	javac $(OPTS) GUI_Server_Process.java
-
 Snapshot.class: Snapshot.java Account.class
 	javac $(OPTS) Snapshot.java
 
