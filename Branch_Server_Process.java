@@ -58,7 +58,7 @@ public class Branch_Server_Process {
 				System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
 			}
                 }
-                thisServerProcess.ready = false;
+                thisServerProcess.ready = true;
                 thisServerProcess.start();
 
                 System.out.println("Branch server is done.");
