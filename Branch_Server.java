@@ -12,12 +12,14 @@ public class Branch_Server {
 	class HeartbeatThread extends Thread {
 	    public void run() {
 			
+	    	/*
 	    	if (!branch.is_master) {
 				try {
 					sleep(5000);
 				} catch (Exception e) {
 				}
 	    	}
+	    	*/
 	    	
 	    	while (true) {
 	    		if (doHeartbeat == true) {
