@@ -34,6 +34,11 @@ public class Branch_Server {
 							transmit_alive( branch );
 						}
 					} else { // check for heartbeat from who this branch thinks is the master
+			    		try {
+			    			Thread.sleep(5000);
+			    		} catch (Exception e) {
+			    		}
+			    		log.log(Level.INFO, "MASTER IS ALIVE IS:  " + master_is_alive + " for process " + branch.processID);
 						if (master_is_alive == false) { // OMG no heartbeat
 							restore_cluster();
 							continue;
@@ -52,7 +57,7 @@ public class Branch_Server {
 		}
 	}
 
-	public boolean master_is_alive = true;
+	public boolean master_is_alive = false;
 	public boolean doHeartbeat = true;
 	public String name = "some branch";
 	private int local_time = 0;
