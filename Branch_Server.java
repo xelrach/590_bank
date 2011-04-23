@@ -56,8 +56,10 @@ public class Branch_Server {
 							restore_cluster();
 							continue;
 						}
-						/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
-						master_branch.setAlive(false); // don't worry; this gets set true in process_input every second (if a heartbeat was received)
+						/* set master to not alive; because we haven't received a heartbeat during this second yet */
+						if (master_branch != null) {
+							master_branch.setAlive(false); // don't worry; this gets set true in process_input every second (if a heartbeat was received)
+						}
 					}
 				}
 
