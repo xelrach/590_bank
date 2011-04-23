@@ -35,6 +35,7 @@ public class Branch_Server {
 							transmit_alive( branch );
 						}
 					} else { // check for heartbeat from who this branch thinks is the master
+						boolean master_is_alive = master_branch.isAlive();
 			    		try {
 			    			Thread.sleep(5000);
 			    		} catch (Exception e) {
@@ -58,7 +59,6 @@ public class Branch_Server {
 		}
 	}
 
-	public boolean master_is_alive = false;
 	public boolean doHeartbeat = true;
 	public String name = "some branch";
 	private int local_time = 0;
@@ -299,6 +299,7 @@ public class Branch_Server {
 	}
 
 	public String peer_acknowledge( String ack_id ) {
+		log.info(branch.processID + " received a heartbeat from " + ack_id);
 		String answer = "ok";
 
 //		log.log(Level.INFO, "Process " + processID  + " received peer heartbeat from " + ack_id );
@@ -309,18 +310,15 @@ public class Branch_Server {
 			log.log(Level.INFO, "Couldn't find peer for processID " + ack_id);
 			return "error";
 		}
-		if (branch_ack.is_master) {
-			//log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
-			master_is_alive = true; // this branch server has received a heartbeat
-		}
 
-//		System.out.println("Process " + processID + " marking " + ack_id + " alive");
-		branch_ack.alive(true);
+		branch_ack.setAlive(true);
 
 		return answer;
 	}
 
 	public void restore_cluster() {
+//		log.log(Level.SEVERE, "BAD RESTORE");
+//		System.exit(99);
 		Map.Entry pairs;
 
 //		if (processID != 2)
@@ -340,7 +338,7 @@ public class Branch_Server {
 			theBranch = (Branch)pairs.getValue();
 
 			System.out.println("Process " + processID + " marking " + theBranch.processID + " dead");
-			theBranch.alive(false);
+			theBranch.setAlive(false);
 		}
 
 		it = cluster_peers.entrySet().iterator();
@@ -379,11 +377,11 @@ public class Branch_Server {
 
 			branch.is_master = false;
 
-			if (newMaster == null || (branch.alive_marker && branch.processID < newMaster.processID)) {
+			if (newMaster == null || (branch.isAlive() && branch.processID < newMaster.processID)) {
 				log.log(Level.INFO, "Process " + this.processID  + " thinks new master might be " + newMaster.toString());
 				newMaster = branch;
 			} else {
-				if (!branch.alive_marker)
+				if (!branch.isAlive())
 					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's dead");
 				if ( branch.processID < newMaster.processID )
 					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's not next in line ");
@@ -397,17 +395,20 @@ public class Branch_Server {
 	}
 
 	public void transmit_alive (Branch process) {
+		log.log(Level.INFO, branch.processID + " sending heartbeat to " + process.processID);
 		if (this.branch.processID == process.processID) {
 			log.log(Level.INFO, "Why is process " + processID + " sending a heartbeat to itself?");
 			return;
 		}
 
-		if (process == null)
+		if (process == null) {
+			log.log(Level.INFO, "process == null");
 			return;
+		}
 		try {
-			messages.send( this.branch, process, "s b " + this.processID );
+			messages.send( this.branch, process, "s b " + this.processID, false );
 		} catch (Exception e) {
-			log.log(Level.INFO, "Could not send heartbeat.");
+			log.log(Level.WARNING, "Could not send heartbeat: "+e);
 		}
 	}
 

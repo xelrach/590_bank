@@ -11,7 +11,7 @@ public class Branch {
 	int processID = 0;
 
 	public boolean is_master = false;
-	public boolean alive_marker = true;
+	private boolean alive_marker = true;
 
 	public HashMap<String, Branch> branches = new HashMap<String, Branch>();
 	public HashMap<String, Branch> inNeighbors = new HashMap<String, Branch>();
@@ -146,8 +146,11 @@ public class Branch {
 		return answer;
 	}
 
-	public void alive(boolean is_alive) {
+	public boolean isAlive() {
+		return alive_marker;
+	}
 
+	public void setAlive(boolean is_alive) {
 //		System.out.println("Process " + processID + " marked " + (is_alive ? "alive" : "dead"));
 		alive_marker = is_alive;
 	}
