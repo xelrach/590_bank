@@ -6,3 +6,11 @@ To test a crash of a primary:
 4) Watch the console output to see the failure and recovery process in action
 	- Note that the new primary will begin sending messages to the backups
 	- You'll see "[ NEW PRIMARY ID ] THINKS IT'S THE MASTER" before each heartbeat is sent out
+	
+To test the recovery process:
+
+1) Click FAIL - server "A" will crash
+2) Make a deposit in server "A"'s GUI
+3) Wait for server "A" to recover
+4) Push the FAIL button again
+5) Query the account
