@@ -43,28 +43,29 @@ public class Branch_Server_Process {
                 String peersStr = args[5];
                 String[] peers = peersStr.split(",");
 
+                // Let this branch server know about all of its initial peers
                 for (int i = 0; i < peers.length; i++) {
-                        if (peers[i].length() < 2)
-                                continue;
+                    if (peers[i].length() < 2)
+                            continue;
 
-                        String[] namePort = peers[i].split("=");
-                        Branch addedPeer = new Branch(args[0], Integer.parseInt(namePort[1]));
-			addedPeer.processID = Integer.parseInt(namePort[0]);
-			addedPeer.ServPort = Integer.parseInt(namePort[1]);
+                    String[] namePort = peers[i].split("=");
+                    Branch addedPeer = new Branch(args[0], Integer.parseInt(namePort[1]));
+					addedPeer.processID = Integer.parseInt(namePort[0]);
+					addedPeer.ServPort = Integer.parseInt(namePort[1]);
+		
+					//System.out.println("Adding peer process for " + thisServerProcess.processID + ": " + namePort[0] + " port " + namePort[1]);
+		
+					if (addedPeer.processID != thisServerProcess.processID) {
+						thisServerProcess.addToCluster( addedPeer );
+					}
 
-			//System.out.println("Adding peer process for " + thisServerProcess.processID + ": " + namePort[0] + " port " + namePort[1]);
-
-			if (addedPeer.processID != thisServerProcess.processID) {
-				thisServerProcess.addToCluster( addedPeer );
-			}
-
-			// set the master process to be the first peer, since that is how topo will feed it in
-			if (thisServerProcess.master_branch == null) {
-				thisServerProcess.master_branch = addedPeer;
-				//System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
-			}
+					// set the master process to be the first peer, since that is how topo will feed it in
+					if (thisServerProcess.master_branch == null) {
+						thisServerProcess.master_branch = addedPeer;
+						//System.out.println("Setting master for " + thisServerProcess.processID + " to " + addedPeer.processID);
+					}
                 }
-                thisServerProcess.ready = true;
+
                 thisServerProcess.start();
 
                 System.out.println("Branch server is done.");

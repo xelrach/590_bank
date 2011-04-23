@@ -9,24 +9,16 @@ import java.util.logging.SimpleFormatter;
 
 public class Branch_Server {
 
-	boolean ready = false;
-
 	class HeartbeatThread extends Thread {
 	    public void run() {
-
+			
+	    	if (!branch.is_master) {
 				try {
 					sleep(5000);
 				} catch (Exception e) {
 				}
-
-	
-			while (ready == false) {
-				try {
-					sleep(1000);
-				} catch (Exception e) {
-				}
-			}
-
+	    	}
+	    	
 	    	while (true) {
 	    		if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
@@ -58,7 +50,7 @@ public class Branch_Server {
 	    }
 	}
 	
-	public boolean master_is_alive = false;
+	public boolean master_is_alive = true;
 	public boolean doHeartbeat = true;
 	public String name = "some branch";
 	private int local_time = 0;
@@ -163,15 +155,14 @@ public class Branch_Server {
 		if (serverThread != null) {
 			Thread thread = new Thread(serverThread);
 			thread.start();
+			heartbeat = new HeartbeatThread();
+			heartbeat.start();
 		}
 		log.log(Level.INFO,"Done starting branch " + branch.name);
-		heartbeat = new HeartbeatThread();
-		heartbeat.start();
-		
 	}
 
 	public String process_input(String input) throws NoPathException {
-//		log.log(Level.INFO,name + " recieved " + input);
+//		log.log(Level.INFO,name + " received " + input);
 		String answer = "";
 
 		String[] tokens = input.split(" ");
