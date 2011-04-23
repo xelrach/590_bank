@@ -12,7 +12,7 @@ Each branch has one primary and two backups.  When a primary fails, one of the b
 ******** Recovery protocol description ********
 Recovery is done by state transfer. When a process wakes up from its fake crash, it asks one of the other processes for the current master server. The recovering process asks the master server for its state. The master server queues incoming messages while it gathers its state and sends it to the recovering process. The recovering process then sets all of its accounts to their current values and is then ready to receive messages as a normal backup. 
 
-Crash Detection - Recap
+Crash Detection - Executive Summary
 
 Crashes are detected by means of a heartbeat signal that is sent out through UDP from the master process to each of the backups. Each 
 backup process listens for the heartbeat and updates a flag upon receipt; meanwhile, a separate monitor thread in each backup process 
