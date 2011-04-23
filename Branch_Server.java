@@ -121,7 +121,7 @@ public class Branch_Server {
 		branch.name = name;
 		branch.ServPort = port;
 
-		branch.GUIPort = port + 1000;
+//		branch.GUIPort = port + 1000;
 		serverThread =  new ServerThread(this, name, port);
 		serverThread.port = port;
 		serverThread.name = name;
@@ -411,8 +411,16 @@ public class Branch_Server {
 		newMaster.is_master = true;
 		master_branch = newMaster;
 
-		if (this.branch.is_master)
+		if (this.branch.is_master) {
+			try {		
+				serverThread.sendToGUI("s c " + this.branch.ServPort);
+				System.out.println("SENT TO GUI: s c " + this.branch.ServPort);
+			} catch (Exception e) {
+				System.out.println("ERROR UPDATING GUI: " + e);
+				System.out.println("GUIPort is " + this.branch.GUIPort);
+			}
 			doHeartbeat = true;
+		}
 	}
 
 	public void transmit_alive (Branch process) {

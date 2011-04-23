@@ -661,6 +661,7 @@ public class ATMGUI extends javax.swing.JFrame {
                 running=false;	}
             System.out.println("GUI server thread starts at port: "+String.format("%d", port));
             while(running){
+/*
                 try{
                     int iport=Integer.parseInt(PortText02.getText());
                     if (port!=iport)
@@ -675,6 +676,8 @@ public class ATMGUI extends javax.swing.JFrame {
                     running=false;
                     continue;
                 }
+*/
+
                 //System.out.println("check."+String.format("%d", port));
                 try{
                     byte[] buf = new byte[256];

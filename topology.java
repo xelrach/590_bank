@@ -77,7 +77,11 @@ public class topology {
 
 		int tmpID = 1;
 
+		int thisGUIPort = 0;
+
 		for (Map.Entry<String, Branch> branch : alreadyCreatedServerList.entrySet()) {
+			thisGUIPort = guiStartingPort++;
+
 			String key = branch.getKey();
 			Branch thisBranch = branch.getValue();
 			thisBranch.processID = tmpID;
@@ -104,7 +108,7 @@ public class topology {
 				newProcessID++;
 				lastProcessID++;
 
-				exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + newPort + " " + newProcessID + " " + thisBranch.getBranches() + " " + peerList + " &";
+				exec_string = "java Branch_Server_Process " +  thisBranch.name + " " + newPort + " " + thisGUIPort + " " + newProcessID + " " + thisBranch.getBranches() + " " + peerList + " &";
 
 				System.out.println(exec_string);
 				final Process p = Runtime.getRuntime().exec( exec_string );
@@ -135,7 +139,7 @@ public class topology {
 
 			}
 
-			exec_gui_string = "java ATMGUI " + thisBranch.name + " " + "127.0.0.1" + " " + thisBranch.ServPort + " " + (guiStartingPort++);
+			exec_gui_string = "java ATMGUI " + thisBranch.name + " " + "127.0.0.1" + " " + thisBranch.ServPort + " " + thisGUIPort;
 			System.out.println(exec_gui_string);
 			final Process p2 =
 			    Runtime.getRuntime().exec( exec_gui_string );

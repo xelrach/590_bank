@@ -9,16 +9,19 @@ public class Branch_Server_Process {
 
 		thisServerProcess = new Branch_Server(args[0], Integer.parseInt(args[1]));
 
-		thisServerProcess.processID = Integer.parseInt(args[2]);
-		thisServerProcess.branch.processID = Integer.parseInt(args[2]);
+		thisServerProcess.branch.GUIPort = Integer.parseInt(args[2]);
+
+		thisServerProcess.processID = Integer.parseInt(args[3]);
+		thisServerProcess.branch.processID = Integer.parseInt(args[3]);
+
+		System.out.println("Process " + thisServerProcess.branch.processID + " GUIPort is " +  thisServerProcess.branch.GUIPort);
 
 		if (thisServerProcess.branch.ServPort < 7000) {
 			thisServerProcess.branch.is_master = true;
 			thisServerProcess.master_branch = thisServerProcess.branch;
-		} else
-			thisServerProcess.branch.GUIPort = 0;
+		}
 
-		String inNeighborsStr = args[3];
+		String inNeighborsStr = args[4];
 		String[] inNeighbors = inNeighborsStr.split(",");
 
 		for (int i = 0; i < inNeighbors.length; i++) {
@@ -29,7 +32,7 @@ public class Branch_Server_Process {
 			thisServerProcess.addInEdge( addedBranch );
 		}
 
-		String outNeighborsStr = args[4];
+		String outNeighborsStr = args[5];
 		String[] outNeighbors = outNeighborsStr.split(",");
 		for (int i = 0; i < outNeighbors.length; i++) {
 			if (outNeighbors[i].length() < 2)
@@ -39,7 +42,7 @@ public class Branch_Server_Process {
 			thisServerProcess.addOutEdge( addedBranch );
 		}
 
-		String peersStr = args[5];
+		String peersStr = args[6];
 		String[] peers = peersStr.split(",");
 
 		// Let this branch server know about all of its initial peers
