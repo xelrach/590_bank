@@ -440,6 +440,7 @@ public class Branch_Server {
 			master_branch = null;
 			branch.is_master = false;
 			accounts.clear();
+			serverThread.closeSocket();
 			Thread.sleep(sleeptime);
 		} catch (InterruptedException e) {
 			answer = "Fake crash fails.";
@@ -452,6 +453,7 @@ public class Branch_Server {
 
 	public void wakeup() {
 		log.log(Level.INFO, "Waking Up " + branch.processID);
+		serverThread.bindSocket();
 		doHeartbeat = true;
 		Iterator it = cluster_peers.values().iterator();
 		Branch otherBranch = (Branch)it.next();
@@ -796,7 +798,7 @@ public class Branch_Server {
 }
 
 class ServerThread implements Runnable {
-	protected DatagramSocket socket = null;
+	protected DatagramSocket socket;
 	protected BufferedReader in = null;
 	protected boolean serverRunning = true;
 
@@ -823,9 +825,7 @@ class ServerThread implements Runnable {
 		socket.send(packet);
 	}
 
-	public void run() {
-		log.info(name + " is running.");
-
+	public void bindSocket() {
 		try {
 			log.info(name + "." + thisBranch.processID + " is binding to port: " + port);
 			socket = new DatagramSocket(port);
@@ -833,6 +833,15 @@ class ServerThread implements Runnable {
 			log.log(Level.INFO, "Could not create socket" + e);
 			serverRunning = false;
 		}
+	}
+
+	public void closeSocket() {
+		socket.close();
+	}
+
+	public void run() {
+		log.info(name + " is running.");
+		bindSocket();
 
 		while (serverRunning) {
 			try {
@@ -879,7 +888,7 @@ class ServerThread implements Runnable {
 			}
 		}
 		System.out.println("Closing socket.");
-		socket.close();
+		closeSocket();
 	}
 
 }
