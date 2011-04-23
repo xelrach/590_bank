@@ -10,6 +10,12 @@ import java.util.logging.SimpleFormatter;
 public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
+
+		Branch_Server context;
+		HeartbeatThread(Branch_Server context) {
+			context = this.context;
+		}
+
 		public void run() {
 
 			/*
@@ -64,7 +70,20 @@ public class Branch_Server {
 		}
 
 		private void broadcast_master_dead() {
-			
+			Branch process;
+			Map.Entry pairs;
+
+			Iterator it = cluster_peers.entrySet().iterator();
+			while (it.hasNext()) {
+				pairs = (Map.Entry)it.next();
+				process = (Branch)pairs.getValue();
+
+				try {
+					messages.send( context.branch, process, "s c " + context.processID, false );
+				} catch (Exception e) {
+					log.log(Level.WARNING, "Could not send heartbeat: "+e);
+				}
+			}
 		}
 	}
 
@@ -172,7 +191,7 @@ public class Branch_Server {
 		if (serverThread != null) {
 			Thread thread = new Thread(serverThread);
 			thread.start();
-			heartbeat = new HeartbeatThread();
+			heartbeat = new HeartbeatThread(this);
 			heartbeat.start();
 		}
 		log.log(Level.INFO,"Done starting branch " + branch.name);
