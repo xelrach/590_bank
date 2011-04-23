@@ -406,6 +406,9 @@ public class Branch_Server {
 
 		newMaster.is_master = true;
 		master_branch = newMaster;
+
+		if (this.branch.is_master)
+			doHeartbeat = true;
 	}
 
 	public void transmit_alive (Branch process) {
