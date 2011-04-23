@@ -18,14 +18,12 @@ public class Branch_Server {
 
 		public void run() {
 
-			/*
 			if (!branch.is_master) {
 				try {
 					sleep(5000);
 				} catch (Exception e) {
 				}
 			}
-			*/
 
 			while (true) {
 				if (doHeartbeat == true) {
