@@ -39,12 +39,14 @@ public class Branch_Server {
 						if (master_branch != null) {
 							master_is_alive = master_branch.isAlive();
 						}
-			    		try {
-			    			Thread.sleep(5000);
-			    		} catch (Exception e) {
-			    		}
-			    		log.log(Level.INFO, "MASTER IS ALIVE IS:  " + master_is_alive + " for process " + branch.processID);
+			    		// log.log(Level.INFO, "MASTER IS ALIVE IS:  " + master_is_alive + " for process " + branch.processID);
 						if (master_is_alive == false) { // OMG no heartbeat
+							broadcast_master_dead();
+							try {
+								sleep(500);
+							} catch (InterruptedException e) {
+								
+							}
 							restore_cluster();
 							continue;
 						}
@@ -59,6 +61,10 @@ public class Branch_Server {
 				} catch (Exception e) {
 				}
 			}
+		}
+
+		private void broadcast_master_dead() {
+			
 		}
 	}
 
