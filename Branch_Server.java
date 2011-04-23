@@ -369,21 +369,21 @@ public class Branch_Server {
 //		log.log(Level.INFO, "Process " + this.processID  + " is determining the new master.");
 
 		Iterator it = cluster_peers.entrySet().iterator();
-		Branch branch;
+		Branch theBranch;
 		while (it.hasNext()) {
 
 			pairs = (Map.Entry)it.next();
-			branch = (Branch) pairs.getValue();
+			theBranch = (Branch) pairs.getValue();
 
-			branch.is_master = false;
+			theBranch.is_master = false;
 
-			if (newMaster == null || (branch.isAlive() && branch.processID < newMaster.processID)) {
+			if (newMaster == null || (theBranch.isAlive() && theBranch.processID < newMaster.processID)) {
 				log.log(Level.INFO, "Process " + this.processID  + " thinks new master might be " + newMaster.toString());
-				newMaster = branch;
+				newMaster = theBranch;
 			} else {
-				if (!branch.isAlive())
+				if (!theBranch.isAlive())
 					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's dead");
-				if ( branch.processID < newMaster.processID )
+				if ( theBranch.processID < newMaster.processID )
 					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's not next in line ");
 			}
 		}
@@ -416,6 +416,7 @@ public class Branch_Server {
 		String answer = "error";
 		int sleepsecond = 5;
 		//sleepsecond += (int)(Math.random() * 106);
+		branch.is_master = false;
 		long sleeptime = sleepsecond * 1000;
 		try {
 			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
