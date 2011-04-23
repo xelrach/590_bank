@@ -25,7 +25,10 @@ public class Branch_Server {
 				}
 			}
 
+			int missed_heartbeats = 0;
+
 			while (true) {
+
 				if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
 						log.log(Level.INFO, branch.processID + " THINKS IT'S THE MASTER");
@@ -41,10 +44,12 @@ public class Branch_Server {
 					} else { // check for heartbeat from who this branch thinks is the master
 						boolean master_is_alive = false;
 						if (master_branch != null) {
-							master_is_alive = master_branch.isAlive();
+							if (!master_branch.isAlive()) {
+								missed_heartbeats++;
+							}
 						}
 			    		// log.log(Level.INFO, "MASTER IS ALIVE IS:  " + master_is_alive + " for process " + branch.processID);
-						if (master_is_alive == false) { // OMG no heartbeat
+						if (missed_heartbeats > 1) { // OMG no heartbeat
 							//broadcast_master_dead();
 							try {
 								sleep(500);
@@ -52,6 +57,7 @@ public class Branch_Server {
 								
 							}
 							restore_cluster();
+							missed_heartbeats = 0;
 							continue;
 						}
 						/* set master to not alive; because we haven't received a heartbeat during this second yet */
