@@ -24,6 +24,7 @@ public class Branch_Server {
 			while (true) {
 				if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
+						log.log(Level.INFO, branch.processID + " THINKS IT'S THE MASTER");
 						// send heartbeat to all peers
 						Map.Entry pairs;
 						Iterator it = cluster_peers.entrySet().iterator();
@@ -309,7 +310,7 @@ public class Branch_Server {
 			return "error";
 		}
 		if (branch_ack.is_master) {
-//			log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
+			//log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
 
@@ -331,23 +332,23 @@ public class Branch_Server {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
 		}
 
-		Branch branch;
+		Branch theBranch;
 
 		Iterator it = cluster_peers.entrySet().iterator();
 		while (it.hasNext()) {
 			pairs = (Map.Entry)it.next();
-			branch = (Branch)pairs.getValue();
+			theBranch = (Branch)pairs.getValue();
 
-			System.out.println("Process " + processID + " marking " + branch.processID + " dead");
-			branch.alive(false);
+			System.out.println("Process " + processID + " marking " + theBranch.processID + " dead");
+			theBranch.alive(false);
 		}
 
 		it = cluster_peers.entrySet().iterator();
 		while (it.hasNext()) {
 			pairs = (Map.Entry)it.next();
-			branch = (Branch)pairs.getValue();
-			log.log(Level.INFO, "Process " + this.processID  + " is sending a peer heartbeat to " + branch.processID);
-			transmit_alive( branch );
+			theBranch = (Branch)pairs.getValue();
+			log.log(Level.INFO, "Process " + this.processID  + " is sending a peer heartbeat to " + theBranch.processID);
+			transmit_alive( theBranch );
 		}
 
 		try {
@@ -405,7 +406,9 @@ public class Branch_Server {
 			return;
 		try {
 			messages.send( this.branch, process, "s b " + this.processID );
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			log.log(Level.INFO, "Could not send heartbeat.");
+		}
 	}
 
 	public String fakecrash() {
