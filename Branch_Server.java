@@ -330,12 +330,6 @@ public class Branch_Server {
 	}
 
 	public void restore_cluster() {
-//		log.log(Level.SEVERE, "BAD RESTORE");
-//		System.exit(99);
-
-//		if (processID != 2)
-//			return;
-
 		if (master_branch != null) {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was " + master_branch.processID );
 		} else {
@@ -344,7 +338,6 @@ public class Branch_Server {
 
 		Map.Entry pairs;
 		Branch theBranch;
-
 
 		Iterator it = cluster_peers.entrySet().iterator();
 		while (it.hasNext()) {
@@ -357,7 +350,7 @@ public class Branch_Server {
 		try {
 			log.log(Level.INFO, "Process " + this.processID  + " is sleeping while waiting for peer heartbeats.");
 			doHeartbeat = false;
-			Thread.sleep(10000);
+			Thread.sleep(2000);
 			log.log(Level.INFO, "Process " + this.processID  + " is done sleeping after waiting for peer heartbeats.");
 		} catch (Exception e) {
 		}
@@ -401,9 +394,9 @@ public class Branch_Server {
 				newMaster = theBranch;
 			} else {
 				if (!theBranch.isAlive())
-					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's dead");
+					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + theBranch.toString() + " because it's dead");
 				if ( theBranch.processID < newMaster.processID )
-					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + newMaster.toString() + " because it's not next in line ");
+					log.log(Level.INFO, "Process " + this.processID  + ": new master is not " + theBranch.toString() + " because it's not next in line ");
 			}
 		}
 
