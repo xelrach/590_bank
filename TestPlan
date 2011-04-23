@@ -1,0 +1,8 @@
+To test a crash of a primary:
+
+1) Execute program as described in README
+2) Wait => 5 seconds to allow setup to occur
+3) Hit the FAIL button on the GUI
+4) Watch the console output to see the failure and recovery process in action
+	- Note that the new primary will begin sending messages to the backups
+	- You'll see "[ NEW PRIMARY ID ] THINKS IT'S THE MASTER" before each heartbeat is sent out

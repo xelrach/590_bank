@@ -19,3 +19,13 @@ Zach (zdexter):  GUI_Server_Process and associated code for ATMGUI (the GUI Serv
 Hui (hguo): Added snapshot button and text area to show snap answer. Added server thread to GUI.
 
 Pete (pstein): Broke the branches into seperate processes. Wrote marker messages.
+
+Milestone #3:
+
+Charles (noneman):  Recovery protocol; extensive debugging.  ~ 15 hrs
+
+Hui (hguo):  Fake crash button/method.
+
+Pete (pstein):  Agreement/consensus protocol; extensive debugging.  ~ 15 hrs
+
+Zach (zdexter):  Failure detector; extensive debugging.  ~ 15 hrs
