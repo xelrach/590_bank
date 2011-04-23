@@ -1,5 +1,5 @@
 public class Account {
-	
+
 	public String id;
 	private float balance = 0.0f;
 

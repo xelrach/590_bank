@@ -10,19 +10,19 @@ import java.util.logging.SimpleFormatter;
 public class Branch_Server {
 
 	class HeartbeatThread extends Thread {
-	    public void run() {
-			
-	    	/*
-	    	if (!branch.is_master) {
+		public void run() {
+
+			/*
+			if (!branch.is_master) {
 				try {
 					sleep(5000);
 				} catch (Exception e) {
 				}
-	    	}
-	    	*/
-	    	
-	    	while (true) {
-	    		if (doHeartbeat == true) {
+			}
+			*/
+
+			while (true) {
+				if (doHeartbeat == true) {
 					if (branch.is_master == true) { // if this branch thinks it's the master
 						// send heartbeat to all peers
 						Map.Entry pairs;
@@ -33,25 +33,25 @@ public class Branch_Server {
 							branch = (Branch)pairs.getValue();
 							transmit_alive( branch );
 						}
-				    } else { // check for heartbeat from who this branch thinks is the master
-				    	if (master_is_alive == false) { // OMG no heartbeat
-				    		restore_cluster();
-				    		continue;
-				    	}
-				    	/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
-				    	master_is_alive = false; // don't worry; this gets set true in process_input every second (if a heartbeat was received)
-				    }
-		    	}
-	    		
+					} else { // check for heartbeat from who this branch thinks is the master
+						if (master_is_alive == false) { // OMG no heartbeat
+							restore_cluster();
+							continue;
+						}
+						/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
+						master_is_alive = false; // don't worry; this gets set true in process_input every second (if a heartbeat was received)
+					}
+				}
+
 				// now wait a second to allow sending (or receipt) or heartbeat
-	    		try {
-	    			Thread.sleep(1000);
-	    		} catch (Exception e) {
-	    		}
-	    	}
-	    }
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+				}
+			}
+		}
 	}
-	
+
 	public boolean master_is_alive = true;
 	public boolean doHeartbeat = true;
 	public String name = "some branch";
@@ -76,16 +76,16 @@ public class Branch_Server {
 	private HashMap<String, Snapshot> snapshots = new HashMap<String, Snapshot>();
 	private NetworkWrapper messages;
 
-	public Branch_Server(String name, int port) {		 
+	public Branch_Server(String name, int port) {
 		this.name = name;
 		this.port = port;
 		this.backupID = backupID;
 
 		log = Logger.getLogger(Branch_Server.class.getName());
 		fh = null;
-		try{
+		try {
 			fh = new FileHandler("Branch_Server." + name + ".log");
-		}catch (Exception e) {
+		} catch (Exception e) {
 			System.err.println(e);
 		}
 		Logger.getLogger("").addHandler(fh);
@@ -174,7 +174,7 @@ public class Branch_Server {
 		String accountID = "";
 		String arg4 = "";
 		String arg5 = "";
-		
+
 		String UpdateMsg = new String();
 
 		if (tokens.length > 0) {
@@ -209,20 +209,20 @@ public class Branch_Server {
 				++local_time;
 				answer = withdrawal(accountID, Float.parseFloat(arg4));
 				UpdateMsg = input;
-                                UpdateToBackups(UpdateMsg);
-			} else if (command.equals("f")){
-                                answer=fakecrash();
-                        }else if (command.equals("d")) {
+				UpdateToBackups(UpdateMsg);
+			} else if (command.equals("f")) {
+				answer=fakecrash();
+			} else if (command.equals("d")) {
 				++local_time;
 				answer = deposit(accountID, Float.parseFloat(arg4));
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
+				UpdateMsg = input;
+				UpdateToBackups(UpdateMsg);
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-                                //transfer function needs changing.
+				UpdateMsg = input;
+				UpdateToBackups(UpdateMsg);
+				//transfer function needs changing.
 			} else if (command.equals("s")) {
 				answer = startSnapshot();
 			} else if (command.equals("q")) {
@@ -232,9 +232,9 @@ public class Branch_Server {
 				log.log(Level.INFO, answer);
 			} else if (command.equals("k")) {
 				//Kill message
-                                    UpdateMsg = input;
-                                    UpdateToBackups(UpdateMsg);
-			    this.serverThread.serverRunning = false;
+				UpdateMsg = input;
+				UpdateToBackups(UpdateMsg);
+				this.serverThread.serverRunning = false;
 				System.exit(0);
 			}
 		} else if (messageType == 's') {
@@ -243,9 +243,9 @@ public class Branch_Server {
 			} else if (command.equals("t")) {
 				++local_time;
 				answer = transfer(accountID, arg4, Float.parseFloat(arg5));
-			    UpdateMsg = input;
-			    UpdateToBackups(UpdateMsg);
-                                //transfer function needs changing.
+				UpdateMsg = input;
+				UpdateToBackups(UpdateMsg);
+				//transfer function needs changing.
 			} else if (command.equals("b")) {
 				//log.log(Level.INFO, "Process " + processID  + " received a heartbeat");
 				answer = peer_acknowledge( tokens[2] );
@@ -258,39 +258,39 @@ public class Branch_Server {
 //				return answer; // we just want the integer
 			}
 		}
-/*
-		if (!answer.equals("ok")) {
-			System.out.println("");
-			System.out.print("Bad Result: " + answer);
-//			return null;
-		}*/
+		/*
+				if (!answer.equals("ok")) {
+					System.out.println("");
+					System.out.print("Bad Result: " + answer);
+		//			return null;
+				}*/
 		answer = "s" + " " + answer;
 		return answer;
 	}
 
-        public void UpdateToBackups(String msg) {
+	public void UpdateToBackups(String msg) {
 		if (!branch.is_master) {
 			return;
 		}
-            Iterator it = cluster_peers.values().iterator();
-	    log.log(Level.INFO, "cluster_peers size: "+cluster_peers.size());
-            Branch otherBranch;
-            while (it.hasNext()) {
-                otherBranch = (Branch)it.next();
-		log.log(Level.INFO, "Considering forwarding to: "+otherBranch.processID);
-                if (otherBranch.is_master) {
-			log.log(Level.INFO, "Had is_master. WHY???");
-                    continue;
+		Iterator it = cluster_peers.values().iterator();
+		log.log(Level.INFO, "cluster_peers size: "+cluster_peers.size());
+		Branch otherBranch;
+		while (it.hasNext()) {
+			otherBranch = (Branch)it.next();
+			log.log(Level.INFO, "Considering forwarding to: "+otherBranch.processID);
+			if (otherBranch.is_master) {
+				log.log(Level.INFO, "Had is_master. WHY???");
+				continue;
+			}
+			// fix here
+			try {
+				log.log(Level.INFO, "Forwarding " + msg + " to " + otherBranch.processID);
+				messages.send(branch,otherBranch,msg,false);
+			} catch (Exception e) {
+				log.log(Level.SEVERE,e.toString());
+			}
 		}
-                // fix here
-		try{
-			log.log(Level.INFO, "Forwarding " + msg + " to " + otherBranch.processID);
-	                messages.send(branch,otherBranch,msg,false);
-		}catch(Exception e){
-			log.log(Level.SEVERE,e.toString());
-		}
-            }
-        }
+	}
 
 	public String peer_acknowledge( String ack_id ) {
 		String answer = "ok";
@@ -310,7 +310,7 @@ public class Branch_Server {
 
 //		System.out.println("Process " + processID + " marking " + ack_id + " alive");
 		branch_ack.alive(true);
-		
+
 		return answer;
 	}
 
@@ -361,7 +361,7 @@ public class Branch_Server {
 
 		Map.Entry pairs;
 		Branch newMaster = this.branch;
-		
+
 //		log.log(Level.INFO, "Process " + this.processID  + " is determining the new master.");
 
 		Iterator it = cluster_peers.entrySet().iterator();
@@ -398,24 +398,23 @@ public class Branch_Server {
 
 		if (process == null)
 			return;
-		try{
+		try {
 			messages.send( this.branch, process, "s b " + this.processID );
-		} catch(Exception e) {}
+		} catch (Exception e) {}
 	}
 
-	public String fakecrash(){
+	public String fakecrash() {
 		String answer = "error";
 		int sleepsecond = 5;
 		//sleepsecond += (int)(Math.random() * 106);
 		long sleeptime = sleepsecond * 1000;
-		try{
+		try {
 			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
 			local_time = 0;
 			doHeartbeat = false;
 			accounts.clear();
 			Thread.sleep(sleeptime);
-		}
-		catch(InterruptedException e){
+		} catch (InterruptedException e) {
 			answer = "Fake crash fails.";
 			return answer;
 		}
@@ -424,7 +423,7 @@ public class Branch_Server {
 		return answer;
 	}
 
-	public void wakeup(){
+	public void wakeup() {
 		log.log(Level.INFO, "Waking Up " + branch.processID);
 		doHeartbeat = true;
 		Iterator it = cluster_peers.values().iterator();
@@ -451,22 +450,22 @@ public class Branch_Server {
 	}
 
 	Branch queryMaster(Branch otherBranch) {
-/*		try{
-			return new Socket("localhost", 1234);
-		} catch (Exception e) {
-		}
-		return null;*/
+		/*		try{
+					return new Socket("localhost", 1234);
+				} catch (Exception e) {
+				}
+				return null;*/
 		String sMaster = "";
 		log.log(Level.INFO, "Asking " + otherBranch.processID + " who the master is.");
-		try{
-		sMaster = messages.send(branch, otherBranch, "s qm");
-		}catch (Exception e){}
+		try {
+			sMaster = messages.send(branch, otherBranch, "s qm");
+		} catch (Exception e) {}
 		sMaster = sMaster.trim();
 		log.log(Level.INFO, "*" + sMaster.substring(2) + "*");
 		return cluster_peers.get( Integer.parseInt(sMaster.substring(2)) );
-/*		int primMasterProcessID = Integer.parseInt(sMaster);
-		Integer masterProcessID = new Integer(primMasterProcessID);
-		return cluster_peers.get(masterProcessID);*/
+		/*		int primMasterProcessID = Integer.parseInt(sMaster);
+				Integer masterProcessID = new Integer(primMasterProcessID);
+				return cluster_peers.get(masterProcessID);*/
 	}
 
 	String queryMasterRespond() {
@@ -482,7 +481,7 @@ public class Branch_Server {
 		return state;
 	}
 
-	/** 
+	/**
 	 * Start a snapshot
 	 */
 	public String startSnapshot() {
@@ -494,7 +493,7 @@ public class Branch_Server {
 	}
 
 
-	/** 
+	/**
 	 * Handles the reception of a snapshot marker.
 	 *
 	 * @param sourceBranch The branch that sent the marker.
@@ -602,7 +601,7 @@ public class Branch_Server {
 			return answer;
 
 		account.addBalance(-amount);
-	
+
 		answer = "ok";
 
 		return answer;
@@ -621,7 +620,7 @@ public class Branch_Server {
 			return "wrongbranch " + getBranchFromAccountID(accountID) + ", " + this.name;
 
 		checkOrCreateAccount(accountID);
-		
+
 
 		if (amount < 0) {
 			answer = "error-invalid";
@@ -634,7 +633,7 @@ public class Branch_Server {
 			return answer;
 
 		account.addBalance(amount);
-	
+
 		answer = "ok";
 
 		return answer;
@@ -652,7 +651,7 @@ public class Branch_Server {
 				System.out.println("Yes, because neighbors are " + messages.whoNeighbors());
 				return true; // remote branch that this one can talk to
 			}
-				System.out.println("No, neighbors are " + messages.whoNeighbors());
+			System.out.println("No, neighbors are " + messages.whoNeighbors());
 		}
 
 		Account account = accounts.get(accountID);
@@ -712,11 +711,11 @@ public class Branch_Server {
 	}
 
 	public void sendTransfer(Account src, Account dest, float amount) {
-                                if (branch.is_master == false) return;
+		if (branch.is_master == false) return;
 		String branchID = dest.getBranchID();
 		String message = "s" + " t " + src.id + " " + dest.id + " " + amount;
-		try{
-		messages.send( branchID, message );
+		try {
+			messages.send( branchID, message );
 		} catch (Exception e) {}
 	}
 
@@ -739,7 +738,7 @@ public class Branch_Server {
 		answer = "q" + " " + accountID + " " + Float.toString(account.getBalance());
 
 		return answer;
- 	}
+	}
 
 	public void checkOrCreateAccount(String accountID) {
 		if (!validAccount(accountID)) {
@@ -755,106 +754,106 @@ public class Branch_Server {
 	void transmitMarker(String originBranch, int snapshotID) {
 		String message = "s m " + name + " " + originBranch + " " + snapshotID;
 
-		try{
-		Thread.sleep(4000);
-		}catch(Exception e){}
+		try {
+			Thread.sleep(4000);
+		} catch (Exception e) {}
 		for (Map.Entry<String, Branch> branch : outNeighbors.entrySet()) {
 			String key = branch.getKey();
 			Branch outBranch = branch.getValue();
-			try{
-			messages.send( outBranch.name, message );
-			}catch (Exception e) {}
+			try {
+				messages.send( outBranch.name, message );
+			} catch (Exception e) {}
 		}
 	}
 
 }
 
 class ServerThread implements Runnable {
-    protected DatagramSocket socket = null;
-    protected BufferedReader in = null;
-    protected boolean serverRunning = true;
+	protected DatagramSocket socket = null;
+	protected BufferedReader in = null;
+	protected boolean serverRunning = true;
 
-    public String name;
-    public int port;
-    public Branch_Server thisBranch;
-    Logger log = Logger.getLogger(ServerThread.class.getName());
+	public String name;
+	public int port;
+	public Branch_Server thisBranch;
+	Logger log = Logger.getLogger(ServerThread.class.getName());
 
-    public ServerThread(Branch_Server branch, String name, int port) { 
-    	this.thisBranch = branch;
-    	this.name = name;
-    	this.port = port;
-    }
+	public ServerThread(Branch_Server branch, String name, int port) {
+		this.thisBranch = branch;
+		this.name = name;
+		this.port = port;
+	}
 
-    public void sendToGUI(String message) throws IOException {
-        send(message, thisBranch.getGUIAddress(), thisBranch.getGUIPort());
-    }
+	public void sendToGUI(String message) throws IOException {
+		send(message, thisBranch.getGUIAddress(), thisBranch.getGUIPort());
+	}
 
-    public void send(String message, InetAddress address, int port) throws IOException {
-    	byte[] buf = new byte[message.length()];
-    	buf = message.getBytes();
-    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+	public void send(String message, InetAddress address, int port) throws IOException {
+		byte[] buf = new byte[message.length()];
+		buf = message.getBytes();
+		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 //    	log.log(Level.INFO, name + " sending " + message + " to port: " + port);
-        socket.send(packet);
-    }
+		socket.send(packet);
+	}
 
-    public void run() {
+	public void run() {
 		log.info(name + " is running.");
 
-    	try {
-		log.info(name + "." + thisBranch.processID + " is binding to port: " + port);
-    		socket = new DatagramSocket(port);
-    	} catch(Exception e) {
-    		log.log(Level.INFO, "Could not create socket" + e);
-    		serverRunning = false;
-    	}
+		try {
+			log.info(name + "." + thisBranch.processID + " is binding to port: " + port);
+			socket = new DatagramSocket(port);
+		} catch (Exception e) {
+			log.log(Level.INFO, "Could not create socket" + e);
+			serverRunning = false;
+		}
 
-        while (serverRunning) {
-            try {
-                byte[] inbuf = new byte[256];
+		while (serverRunning) {
+			try {
+				byte[] inbuf = new byte[256];
 
-                // receive request
-                DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
-                socket.receive(packet);
+				// receive request
+				DatagramPacket packet = new DatagramPacket(inbuf, inbuf.length);
+				socket.receive(packet);
 
-        		// figure out response
-        		String input = new String(inbuf);
-                String dString = thisBranch.process_input(input);
+				// figure out response
+				String input = new String(inbuf);
+				String dString = thisBranch.process_input(input);
 
-        		if (dString==null) {
-        			continue;
-        		}
-//        		System.out.println("Sending: " + dString);
-        		    // send the response to the client at "address" and "port"
-
-                InetAddress address = packet.getAddress();
-                int port = packet.getPort();
-    		    send(dString,address,port);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    log.log(Level.INFO, "SERVER FAILURE due to IOException:  " + e);
-    		        serverRunning = false;
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                    log.log(Level.INFO, "SERVER FAILURE due to NullPointerException:  " + e);
-    		        serverRunning = false;
-    			} catch (NoPathException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					log.log(Level.INFO, "SERVER FAILURE due to NoPathException:  " + e);
-					serverRunning = false;
+				if (dString==null) {
+					continue;
 				}
+//        		System.out.println("Sending: " + dString);
+				// send the response to the client at "address" and "port"
 
-    		try {
-    			Thread.sleep(100);
-    		} catch (Exception e) {
-    		    serverRunning = false;
-    		    log.log(Level.INFO, "SERVER FAILURE during Thread.sleep:  " + e);
-    		    System.out.println("Sleep exception caused branch server to crash");
-    		}
-        }
-	    System.out.println("Closing socket.");
-        socket.close();
-    }
+				InetAddress address = packet.getAddress();
+				int port = packet.getPort();
+				send(dString,address,port);
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.log(Level.INFO, "SERVER FAILURE due to IOException:  " + e);
+				serverRunning = false;
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				log.log(Level.INFO, "SERVER FAILURE due to NullPointerException:  " + e);
+				serverRunning = false;
+			} catch (NoPathException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				log.log(Level.INFO, "SERVER FAILURE due to NoPathException:  " + e);
+				serverRunning = false;
+			}
+
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) {
+				serverRunning = false;
+				log.log(Level.INFO, "SERVER FAILURE during Thread.sleep:  " + e);
+				System.out.println("Sleep exception caused branch server to crash");
+			}
+		}
+		System.out.println("Closing socket.");
+		socket.close();
+	}
 
 }
 
@@ -896,7 +895,7 @@ class NetworkWrapper {
 			} else {
 				return "";
 			}
-		} catch( Exception e ) {
+		} catch ( Exception e ) {
 			clientSocket.close();
 			throw new NoPathException(e.toString());
 		}
@@ -933,13 +932,13 @@ class NetworkWrapper {
 		System.out.println("topology is " + topology.toString());
 
 		String result = "neighbors: ";
-		
+
 		Object[] keys = topology.keySet().toArray();
 		String key;
 		for (int i = 0; i < keys.length; i++) {
 			key = (String)keys[i];
 
-			result = result + key + " ";	
+			result = result + key + " ";
 		}
 
 		return result;

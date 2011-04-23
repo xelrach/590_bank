@@ -1,4 +1,4 @@
-class UnitTest{
+class UnitTest {
 	private static boolean testSnapshotParse() {
 		boolean good = true;
 		String s = "00001.1 4 b 00001.01 12.3 00001.02 14.5 p 00002.22 00001.01 10.1";

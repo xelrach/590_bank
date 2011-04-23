@@ -30,7 +30,7 @@ class Snapshot {
 	HashSet<Branch> markers = new HashSet<Branch>();
 	public Branch origin;
 	public int number;
-	
+
 	Snapshot (int time, ArrayList<Account> accnts, Branch originBranch, int snapshotNumber) {
 		local_time = time;
 		accounts = new ArrayList<Account>();
@@ -87,7 +87,7 @@ class Snapshot {
 	public String getName() {
 		return getName(origin, number);
 	}
-	
+
 	public static String getName(Branch branch, int number) {
 		return branch.name + "." + number;
 	}
