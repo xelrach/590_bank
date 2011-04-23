@@ -1,7 +1,7 @@
 ******** Quantification of timing and delay procedures ********
 
 Heartbeats go out every second
-	- If more than 1 heartbeat is missed in any 1-second period, we can infer failure
+	- If more than 1 heartbeat is missed in any 2-second period, we can infer failure
 When backups are waiting to see who is alive, in order to determine who should become the new primary
 	- There's a 2-second wait to allow peer acknowledgement messages to come in
 
