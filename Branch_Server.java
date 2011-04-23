@@ -47,7 +47,7 @@ public class Branch_Server {
 						}
 			    		// log.log(Level.INFO, "MASTER IS ALIVE IS:  " + master_is_alive + " for process " + branch.processID);
 						if (master_is_alive == false) { // OMG no heartbeat
-							broadcast_master_dead();
+							//broadcast_master_dead();
 							try {
 								sleep(500);
 							} catch (InterruptedException e) {
@@ -69,23 +69,8 @@ public class Branch_Server {
 			}
 		}
 
-		private void broadcast_master_dead() {
-			Branch process;
-			Map.Entry pairs;
-
-			Iterator it = cluster_peers.entrySet().iterator();
-			while (it.hasNext()) {
-				pairs = (Map.Entry)it.next();
-				process = (Branch)pairs.getValue();
-
-				try {
-					messages.send( context.branch, process, "s c " + context.processID, false );
-				} catch (Exception e) {
-					log.log(Level.WARNING, "Could not send heartbeat: "+e);
-				}
-			}
-		}
 	}
+
 
 	public boolean doHeartbeat = true;
 	public String name = "some branch";
@@ -347,7 +332,6 @@ public class Branch_Server {
 	public void restore_cluster() {
 //		log.log(Level.SEVERE, "BAD RESTORE");
 //		System.exit(99);
-		Map.Entry pairs;
 
 //		if (processID != 2)
 //			return;
@@ -358,18 +342,11 @@ public class Branch_Server {
 			log.log(Level.INFO, "Process " + processID  + " restoring cluster. Old master was null?" );
 		}
 
+		Map.Entry pairs;
 		Branch theBranch;
 
+
 		Iterator it = cluster_peers.entrySet().iterator();
-		while (it.hasNext()) {
-			pairs = (Map.Entry)it.next();
-			theBranch = (Branch)pairs.getValue();
-
-			System.out.println("Process " + processID + " marking " + theBranch.processID + " dead");
-			theBranch.setAlive(false);
-		}
-
-		it = cluster_peers.entrySet().iterator();
 		while (it.hasNext()) {
 			pairs = (Map.Entry)it.next();
 			theBranch = (Branch)pairs.getValue();
@@ -386,7 +363,21 @@ public class Branch_Server {
 		}
 
 		determine_master();
-		doHeartbeat = true;
+
+		clear_peer_status();
+	}
+
+	public void clear_peer_status() {
+		Branch process;
+		Map.Entry pairs;
+		Iterator it = cluster_peers.entrySet().iterator();
+		while (it.hasNext()) {
+			pairs = (Map.Entry)it.next();
+			process = (Branch)pairs.getValue();
+
+			System.out.println("Process " + processID + " marking " + process.processID + " dead");
+			process.setAlive(false);
+		}
 	}
 
 	public void determine_master() {
