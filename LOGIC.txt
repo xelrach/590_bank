@@ -1,8 +1,13 @@
 ******** Quantification of timing and delay procedures ********
 
+Heartbeats go out every second
+	- If more than 1 heartbeat is missed in any 1-second period, we can infer failure
+When backups are waiting to see who is alive, in order to determine who should become the new primary
+	- There's a 2-second wait to allow peer acknowledgement messages to come in
 
 ******** Primary/backup method description ********
 
+Each branch has one primary and two backups.  When a primary fails, one of the backups takes over.  Later, when the primary comes online again, the primary will discover that the backup with the lowest ID is the new primary.  The old primary will morph into a backup.
 
 ******** Recovery protocol description ********
 Recovery is done by state transfer. When a process wakes up from its fake crash, it asks one of the other processes for the current master server. The recovering process asks the master server for its state. The master server queues incoming messages while it gathers its state and sends it to the recovering process. The recovering process then sets all of its accounts to their current values and is then ready to receive messages as a normal backup. 
