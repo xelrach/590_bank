@@ -227,6 +227,7 @@ public class Branch_Server {
 				//Query message
 				++local_time;
 				answer = query(accountID);
+				log.log(Level.INFO, answer);
 			} else if (command.equals("k")) {
 				//Kill message
                                     UpdateMsg = input;

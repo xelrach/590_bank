@@ -500,14 +500,15 @@ public class ATMGUI extends javax.swing.JFrame {
             DatagramPacket packet=new DatagramPacket(msg,msg.length,address, port);
             socket.send(packet);
 
-            //packet=new DatagramPacket(msg, msg.length);
-            //socket.receive(packet);
+	byte[] buff = new byte[65536];
+	DatagramPacket response = new DatagramPacket(buff, 100);
+	socket.receive(response);
 
-            String received =new String(packet.getData(),0,packet.getLength());
+            String received =new String(response.getData(),0,response.getLength());
 
             String[] respns=received.split(" ");
             if (respns.length!=4)
-                JOptionPane.showMessageDialog(null, "Invalid Response Message!","Oops",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Invalid Response Message!\n" +received,"Oops",JOptionPane.ERROR_MESSAGE);
             else
             {
                 if ((respns[0].equals("s")) && (respns[1].equals("q")) &&(respns[2].equals(acnt03.getText())))
