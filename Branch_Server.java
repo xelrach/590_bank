@@ -35,7 +35,10 @@ public class Branch_Server {
 							transmit_alive( branch );
 						}
 					} else { // check for heartbeat from who this branch thinks is the master
-						boolean master_is_alive = master_branch.isAlive();
+						boolean master_is_alive = false;
+						if (master_branch != null) {
+							master_is_alive = master_branch.isAlive();
+						}
 			    		try {
 			    			Thread.sleep(5000);
 			    		} catch (Exception e) {
@@ -46,7 +49,7 @@ public class Branch_Server {
 							continue;
 						}
 						/* pretend like master is not alive; because we haven't received a heartbeat during this second yet */
-						master_is_alive = false; // don't worry; this gets set true in process_input every second (if a heartbeat was received)
+						master_branch.setAlive(false); // don't worry; this gets set true in process_input every second (if a heartbeat was received)
 					}
 				}
 
@@ -414,7 +417,7 @@ public class Branch_Server {
 
 	public String fakecrash() {
 		String answer = "error";
-		int sleepsecond = 5;
+		int sleepsecond = 10;
 		//sleepsecond += (int)(Math.random() * 106);
 		branch.is_master = false;
 		long sleeptime = sleepsecond * 1000;
@@ -422,6 +425,8 @@ public class Branch_Server {
 			System.out.println("Branch server " + this.name + " sleeps for " + String.format("%d", sleepsecond) + " seconds.");
 			local_time = 0;
 			doHeartbeat = false;
+			master_branch = null;
+			branch.is_master = false;
 			accounts.clear();
 			Thread.sleep(sleeptime);
 		} catch (InterruptedException e) {
