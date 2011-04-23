@@ -22,10 +22,10 @@ Pete (pstein): Broke the branches into seperate processes. Wrote marker messages
 
 Milestone #3:
 
-Charles (noneman):  Recovery protocol; extensive debugging
+Charles (noneman):  Recovery protocol; extensive debugging.  ~ 15 hrs
 
-Hui (hguo):  Fake crash button/method
+Hui (hguo):  Fake crash button/method.
 
-Pete (pstein):  Agreement/consensus protocol; extensive debugging
+Pete (pstein):  Agreement/consensus protocol; extensive debugging.  ~ 15 hrs
 
-Zach (zdexter):  Failure detector; extensive debugging
+Zach (zdexter):  Failure detector; extensive debugging.  ~ 15 hrs

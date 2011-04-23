@@ -30,12 +30,12 @@ not assume that if process 1 (the master) crashes, that process 2 (the next back
 process 2 may have crashed as well, or otherwise might not be able to communicate, necessitating the promotion of process 3 to become 
 the new master.
 
-Consequently, when the a master-crash is detected, each backup process broadcasts its own heartbeat message to all other backups for 
+Consequently, when the a master-crash is detected, each backup process broadcasts its own "master is dead" message to all other backups for 
 the given branch. Each process maintains a list of the other master/backup processes for the branch that they represent; upon a crash, 
 each process updates its list to indicate that it does not know the status of any other process. The processes then wait a 
-predetermined amount of time to receive the heartbeats from the other backups. Each process updates its list of other backups as the 
+predetermined amount of time (2 seconds) to receive the peer acknowledgements from the other backups. Each process updates its list of other backups as the 
 heartbeats are received, so that after the waiting period is over, each process will have a recent snapshot of which processes are 
-alive and which are not. The master process should be listed as dead, since it has crashed (for the simulated crash, it should be 
+alive and which are not. The master process should be listed as dead, since it has crashed, though the algorithm will work if it's still alive (for the simulated crash, it should be 
 sleeping for the entire time that the backup processes are handling the recovery.) Once the waiting period is over, each process 
 merely looks through its list of other backups, and whichever process is alive and has the lowest processID is assumed to be the new 
 master. The process that determines that it is, itself, the new master, sends an update to the GUI to inform it of the new master 
