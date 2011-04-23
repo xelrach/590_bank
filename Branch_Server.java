@@ -255,11 +255,13 @@ public class Branch_Server {
 			} else if (command.equals("b")) {
 				//log.log(Level.INFO, "Process " + processID  + " received a heartbeat");
 				answer = peer_acknowledge( tokens[2] );
-			} else if (command.equals("s")) {
-				answer = sendState(Integer.parseInt(tokens[2]));
+			} else if (command.equals("state")) {
+				log.log(Level.INFO, input);
+				answer = sendState();
+				log.log(Level.INFO, "Returning State: " + answer);
 			} else if (command.equals("qm")) {
 				answer = queryMasterRespond();
-				return answer; // we just want the integer
+//				return answer; // we just want the integer
 			}
 		}
 /*
@@ -299,7 +301,7 @@ public class Branch_Server {
 	public String peer_acknowledge( String ack_id ) {
 		String answer = "ok";
 
-		log.log(Level.INFO, "Process " + processID  + " received peer heartbeat from " + ack_id );
+//		log.log(Level.INFO, "Process " + processID  + " received peer heartbeat from " + ack_id );
 
 		Branch branch_ack = cluster_peers.get( new Integer(ack_id) );
 
@@ -308,11 +310,11 @@ public class Branch_Server {
 			return "error";
 		}
 		if (branch_ack.is_master) {
-			log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
+//			log.log(Level.INFO, "HEARTBEAT RECEIVED from process " + ack_id + " to process " + processID);
 			master_is_alive = true; // this branch server has received a heartbeat
 		}
 
-		System.out.println("Process " + processID + " marking " + ack_id + " alive");
+//		System.out.println("Process " + processID + " marking " + ack_id + " alive");
 		branch_ack.alive(true);
 		
 		return answer;
@@ -429,18 +431,21 @@ public class Branch_Server {
 	}
 
 	public void wakeup(){
+		log.log(Level.INFO, "Waking Up " + branch.processID);
 		doHeartbeat = true;
 		Iterator it = cluster_peers.values().iterator();
 		Branch otherBranch = (Branch)it.next();
 		master_branch = queryMaster(otherBranch);
-		Snapshot snap = Snapshot.parseSnap(requestState(otherBranch));
+		String state = requestState(otherBranch);
+		log.log(Level.INFO, state);
+		Snapshot snap = Snapshot.parseSnap(state);
 		for (Account a:snap.getAccounts()) {
 			accounts.put(a.id,a);
 		}
 		local_time = snap.local_time;
 	}
 
-	public String sendState(int time) {
+	public String sendState() {
 		//Store the state of the branch
 		Iterator it = accounts.values().iterator();
 		ArrayList<Account> values = new ArrayList<Account>();
@@ -458,22 +463,27 @@ public class Branch_Server {
 		}
 		return null;*/
 		String sMaster = "";
+		log.log(Level.INFO, "Asking " + otherBranch.processID + " who the master is.");
 		try{
 		sMaster = messages.send(branch, otherBranch, "s qm");
 		}catch (Exception e){}
-		int primMasterProcessID = Integer.parseInt(sMaster);
+		sMaster = sMaster.trim();
+		log.log(Level.INFO, "*" + sMaster.substring(2) + "*");
+		return cluster_peers.get( Integer.parseInt(sMaster.substring(2)) );
+/*		int primMasterProcessID = Integer.parseInt(sMaster);
 		Integer masterProcessID = new Integer(primMasterProcessID);
-		return cluster_peers.get(masterProcessID);
+		return cluster_peers.get(masterProcessID);*/
 	}
 
 	String queryMasterRespond() {
+		log.log(Level.INFO, branch.processID + " saying master is: " + master_branch.processID);
 		return Integer.toString(master_branch.processID);
 	}
 
 	public String requestState(Branch otherBranch) {
 		String state = "";
 		try {
-			state = messages.send(branch, otherBranch, "s");
+			state = messages.send(branch, otherBranch, "s state");
 		} catch (Exception e) {}
 		return state;
 	}

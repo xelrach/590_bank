@@ -108,7 +108,8 @@ class Snapshot {
 	}
 
 	public static Snapshot parseSnap(String str) {
-		Pattern pattBasic = Pattern.compile("(\\w+)\\.(\\d+) (\\d+) b(( \\d+\\.\\d+ \\d+.?\\d*)*) p(( \\d+\\.\\d+ \\d+\\.\\d+ \\d+.?\\d*)*)");
+		Pattern pattBasic = Pattern.compile("(\\w+)\\.-?(\\d+) (\\d+) b(( \\d+\\.\\d+ \\d+.?\\d*)*) p(( \\d+\\.\\d+ \\d+\\.\\d+ \\d+.?\\d*)*)");
+		str = str.trim();
 		Matcher matches = pattBasic.matcher(str);
 		matches.find();
 		String origin = matches.group(1);
